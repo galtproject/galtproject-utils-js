@@ -42,3 +42,26 @@ describe('#numberToGeohash()', () => {
         assert.throws(() => utils.numberToGeohash(new BN('1 152 921 504 606 846 976')), Error);
     });
 });
+
+describe('#geohashToGeohash5()', () => {
+    it('should convert geohash string to a numerical representation', function() {
+        assert.equal(utils.geohashToGeohash5("s"), "24");
+        assert.equal(utils.geohashToGeohash5("qwerqwerqwer"), "824642203853484471");
+    });
+
+    it('should throw if unsupported symbol received', function() {
+        assert.throws(() => utils.geohashToGeohash5("asdf123"), RangeError);
+    });
+
+    it('should throw if geohash string contains more than 12 symbols', function() {
+        assert.throws(() => utils.geohashToGeohash5("thirteensymbo"), RangeError);
+    });
+
+    it('should throw if geohash is not a string', function() {
+        assert.throws(() => utils.geohashToGeohash5(123), Error);
+    });
+
+    it('should throw if geohash string is empty', function() {
+        assert.throws(() => utils.geohashToGeohash5(""), Error);
+    });
+});
