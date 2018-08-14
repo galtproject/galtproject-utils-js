@@ -76,7 +76,17 @@ function numberToGeohash(input) {
     return output.join('');
 }
 
+/**
+ * Convert geohash string representation into numeric with toString(10) calling.
+ * @param geohash
+ * @returns {string}
+ */
+function geohashToGeohash5(geohash){
+    return geohashToNumber(geohash).toString(10);
+}
+
 module.exports = {
     geohashToNumber,
-    numberToGeohash
+    numberToGeohash,
+    geohashToGeohash5
 };
