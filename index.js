@@ -89,11 +89,11 @@ function geohashToGeohash5(geohash) {
 }
 
 function geohashToTokenId(geohash) {
-    return BN(geohash).xor(GEOHASH_MASK).toString(10);
+    return (new BN(geohash)).xor(GEOHASH_MASK).toString(10);
 }
 
 function tokenIdToGeohash(tokenId) {
-    return BN(tokenId).xor(GEOHASH_MASK).toString(10);
+    return (new BN(tokenId)).xor(GEOHASH_MASK).toString(10);
 }
 
 module.exports = {

@@ -65,3 +65,9 @@ describe('#geohashToGeohash5()', () => {
         assert.throws(() => utils.geohashToGeohash5(""), Error);
     });
 });
+
+describe('#geohashToTokenId()', () => {
+    it('should convert geohash string to a numerical representation', function() {
+        // assert.equal(utils.geohashToTokenId("824642203853484471"), "24");
+    });
+});
