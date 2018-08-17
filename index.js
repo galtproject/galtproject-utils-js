@@ -2,6 +2,9 @@ const BN = require("bn.js");
 const base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 const base32Array = base32.split('');
 
+const GEOHASH_MASK = new BN('0100000000000000000000000000000000000000000000000000000000000000', 16);
+const PACK_MASK = new BN('0200000000000000000000000000000000000000000000000000000000000000', 16);
+
 // 12 symbols each of 5 bits length = 60 bits
 const limit = new BN('1 152 921 504 606 846 975');
 
@@ -81,12 +84,22 @@ function numberToGeohash(input) {
  * @param geohash
  * @returns {string}
  */
-function geohashToGeohash5(geohash){
+function geohashToGeohash5(geohash) {
     return geohashToNumber(geohash).toString(10);
+}
+
+function geohashToTokenId(geohash) {
+    return (new BN(geohash)).xor(GEOHASH_MASK).toString(10);
+}
+
+function tokenIdToGeohash(tokenId) {
+    return (new BN(tokenId)).xor(GEOHASH_MASK).toString(10);
 }
 
 module.exports = {
     geohashToNumber,
     numberToGeohash,
-    geohashToGeohash5
+    geohashToGeohash5,
+    geohashToTokenId,
+    tokenIdToGeohash
 };
