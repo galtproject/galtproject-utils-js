@@ -96,6 +96,14 @@ function tokenIdToGeohash(tokenId) {
     return (new BN(tokenId)).xor(GEOHASH_MASK).toString(10);
 }
 
+function isPackage(tokenId) {
+    return (new BN(tokenId)).and(PACK_MASK).eq(PACK_MASK);
+}
+
+function isGeohash(tokenId) {
+    return (new BN(tokenId)).and(GEOHASH_MASK).eq(GEOHASH_MASK);
+}
+
 module.exports = {
     geohashToNumber,
     numberToGeohash,
