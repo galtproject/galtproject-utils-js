@@ -96,7 +96,7 @@ function tokenIdToGeohash(tokenId) {
     return (new BN(tokenId)).xor(GEOHASH_MASK).toString(10);
 }
 
-function isPackage(tokenId) {
+function isPack(tokenId) {
     return (new BN(tokenId)).and(PACK_MASK).eq(PACK_MASK);
 }
 
