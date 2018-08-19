@@ -109,5 +109,7 @@ module.exports = {
     numberToGeohash,
     geohashToGeohash5,
     geohashToTokenId,
-    tokenIdToGeohash
+    tokenIdToGeohash,
+    isPack,
+    isGeohash
 };
