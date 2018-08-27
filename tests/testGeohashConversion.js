@@ -67,7 +67,22 @@ describe('#geohashToGeohash5()', () => {
 });
 
 describe('#geohashToTokenId()', () => {
-    it('should convert geohash string to a numerical representation', function() {
-        // assert.equal(utils.geohashToTokenId("824642203853484471"), "24");
+    it('should convert geohash number to a tokenId representation', function() {
+        assert.equal(utils.geohashToTokenId("824642203853484471"), "452312848583266388373324160190187140051835877600158453279955829734764147127");
+    });
+    it('should convert geohash tokenId to a number representation', function() {
+        assert.equal(utils.tokenIdToGeohash("452312848583266388373324160190187140051835877600158453279955829734764147127"), "824642203853484471");
+    });
+});
+
+describe('#isGeohash()', () => {
+    it('should detect geohash by tokenId', function() {
+        assert.equal(utils.isGeohash("452312848583266388373324160190187140051835877600158453279955829734764147127"), true);
+    });
+});
+
+describe('#isPack()', () => {
+    it('should detect pack by tokenId', function() {
+        assert.equal(utils.isPack("904625697166532776746648320380374280103671755200316906558262375061821325316"), true);
     });
 });
