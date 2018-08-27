@@ -10,8 +10,6 @@ const limit = new BN('1 152 921 504 606 846 975');
 
 let decodeMap = {};
 
-
-
 for (let i = 0; i < base32.length; i++) {
     decodeMap[base32[i]] = i;
 }
@@ -88,28 +86,69 @@ function geohashToGeohash5(geohash) {
     return geohashToNumber(geohash).toString(10);
 }
 
+function geohash5ToTokenId(geohash) {
+    return (new BN(geohash.toString(10))).xor(GEOHASH_MASK).toString(10);
+}
+
 function geohashToTokenId(geohash) {
-    return (new BN(geohash)).xor(GEOHASH_MASK).toString(10);
+    return geohash5ToTokenId(geohashToGeohash5(geohash));
+}
+
+function geohashToTokenIdHex(geohash) {
+    return tokenIdToHex(geohashToTokenId(geohash));
+}
+
+function tokenIdToGeohash5(tokenId) {
+    return (new BN(tokenId.toString(10))).xor(GEOHASH_MASK).toString(10);
 }
 
 function tokenIdToGeohash(tokenId) {
-    return (new BN(tokenId)).xor(GEOHASH_MASK).toString(10);
+    return numberToGeohash(tokenIdToGeohash5(tokenId));
+}
+
+function tokenIdHexToTokenId(tokenIdHex) {
+    return new BN(tokenIdHex.replace("0x", ""), 16).toString(10);
+}
+
+function tokenIdHexToGeohash5(tokenIdHex) {
+    return tokenIdToGeohash5(tokenIdHexToTokenId(tokenIdHex));
+}
+
+function tokenIdHexToGeohash(tokenIdHex) {
+    return numberToGeohash(tokenIdHexToGeohash5(tokenIdHex));
+}
+
+function tokenIdToHex(tokenId) {
+    const geohash16 = (new BN(tokenId)).toString(16);
+    let hex;
+    if(geohash16.length === 64) {
+        hex = geohash16;
+    } else {
+        hex = "0".repeat(64 - geohash16.length) + geohash16;
+    }
+    return "0x" + hex;
 }
 
 function isPack(tokenId) {
-    return (new BN(tokenId)).and(PACK_MASK).eq(PACK_MASK);
+    return (new BN(tokenId.toString(10))).and(PACK_MASK).eq(PACK_MASK);
 }
 
 function isGeohash(tokenId) {
-    return (new BN(tokenId)).and(GEOHASH_MASK).eq(GEOHASH_MASK);
+    return (new BN(tokenId.toString(10))).and(GEOHASH_MASK).eq(GEOHASH_MASK);
 }
 
 module.exports = {
     geohashToNumber,
     numberToGeohash,
     geohashToGeohash5,
+    geohash5ToTokenId,
     geohashToTokenId,
+    geohashToTokenIdHex,
+    tokenIdToGeohash5,
     tokenIdToGeohash,
+    tokenIdHexToGeohash5,
+    tokenIdHexToGeohash,
+    tokenIdToHex,
     isPack,
     isGeohash
 };
