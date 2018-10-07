@@ -1,4 +1,4 @@
-const utils = require('../');
+const utils = require('../src/common');
 const BN = require('bn.js');
 const assert = require('assert');
 
