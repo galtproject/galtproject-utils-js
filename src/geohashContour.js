@@ -12,7 +12,7 @@ module.exports = class GeohashContour {
         }));
     }
     
-    static approximate(contour, numberOfChars, processCallback) {
+    static approximate(contour, precision, processCallback) {
         let maxLat;
         let minLat;
         let maxLon;
@@ -38,13 +38,14 @@ module.exports = class GeohashContour {
             }
         });
 
-        const allGeohashes = ngeohash.bboxes(minLat, minLon, maxLat, maxLon, numberOfChars);
+        const allGeohashes = ngeohash.bboxes(minLat, minLon, maxLat, maxLon, precision);
 
         const geohashesInside = [];
         const parentsToChildren = {};
         const parentsForMerge = [];
 
         allGeohashes.forEach((geohash, index) => {
+            console.log('geohash', geohash);
 
             if (GeohashContour.isGeohashInsidePolygon(geohash, polygon)) {
 

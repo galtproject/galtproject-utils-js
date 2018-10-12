@@ -283,7 +283,7 @@ module.exports = class Geohash {
      * @returns {*}
      */
     static getChildByDirection(geohash, direction) {
-        if (direction.length !== 2) {
+        if (direction.length !== 2 || !geohash) {
             return null;
         }
 
@@ -301,7 +301,7 @@ module.exports = class Geohash {
             if(intersection) {
                 resultSymbol = fdSymbol;
             }
-            return fdSymbol;
+            return intersection;
         });
         if(!resultSymbol) {
             return null;
