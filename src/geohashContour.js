@@ -64,13 +64,19 @@ module.exports = class GeohashContour {
      * Merge contours and returns result contour
      * @param baseContour
      * @param mergeContour
+     * @param filterByDuplicates
      * @returns [geohash]
      */
-    static mergeContours(baseContour, mergeContour) {
+    static mergeContours(baseContour, mergeContour, filterByDuplicates = true) {
         const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or");
-        return resultContour.filter(geohash => {
-            return baseContour.indexOf(geohash) === -1 || mergeContour.indexOf(geohash) === -1;
-        });
+        
+        if(filterByDuplicates) {
+            return resultContour.filter(geohash => {
+                return baseContour.indexOf(geohash) === -1 || mergeContour.indexOf(geohash) === -1;
+            });
+        } else {
+            return resultContour;
+        }
     }
 
     /**
