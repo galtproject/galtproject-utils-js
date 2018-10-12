@@ -13,6 +13,7 @@
     "mocha": "^5.2.0"
   },
   "dependencies": {
+    "@mapbox/geojson-area": "^0.2.2",
     "bn.js": "^4.11.8",
     "bs58": "^4.0.1",
     "lodash": "^4.17.11",

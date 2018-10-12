@@ -1,11 +1,19 @@
 const ngeohash = require('ngeohash');
 const _ = require('lodash');
 const Geohash = require('./geohash');
+const geojsonArea = require('@mapbox/geojson-area');
 
 module.exports = class GeohashContour {
     static decodeToLatLng(geohash) {
         const {latitude, longitude} = ngeohash.decode(geohash);
         return {lat: latitude, lon: longitude};
+    }
+
+    static geohashesPolygonArea(contour){
+        return geojsonArea.ring(contour.map((geohash) => {
+            const coors = GeohashContour.decodeToLatLng(geohash);
+            return [coors.lat, coors.lon];
+        }));
     }
     
     static approximate(contour, numberOfChars, processCallback) {
