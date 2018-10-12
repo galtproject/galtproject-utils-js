@@ -11,11 +11,74 @@ module.exports = class GeohashContour {
      * @param contour
      * @returns [lat, lon]
      */
-    static area(contour){
+    static area(contour) {
         return geojsonArea.ring(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             return [coors.lat, coors.lon];
         }));
+    }
+
+    /**
+     * Sort geohashes of contour in clockwise direction
+     * @param contour
+     * @param antiClockwise
+     * @returns {*}
+     */
+    static sortClockwise(contour, antiClockwise = false) {
+        let points = contour.map((geohash) => {
+            const coors = GeohashExtra.decodeToLatLon(geohash);
+            return {x: coors.lat, y: coors.lon};
+        });
+
+        // Find min max to get center
+        // Sort from top to bottom
+        points.sort((a, b) => a.y - b.y);
+
+        // Get center y
+        const cy = (points[0].y + points[points.length - 1].y) / 2;
+
+        // Sort from right to left
+        points.sort((a, b) => b.x - a.x);
+
+        // Get center x
+        const cx = (points[0].x + points[points.length - 1].x) / 2;
+
+        // Center point
+        const center = {x: cx, y: cy};
+
+        // Pre calculate the angles as it will be slow in the sort
+        // As the points are sorted from right to left the first point
+        // is the rightmost
+
+        // Starting angle used to reference other angles
+        let startAng;
+        points.forEach(point => {
+            let ang = Math.atan2(point.y - center.y, point.x - center.x);
+            if (!startAng) {
+                startAng = ang
+            }
+            else {
+                if (ang < startAng) {  // ensure that all points are clockwise of the start point
+                    ang += Math.PI * 2;
+                }
+            }
+            point.angle = ang; // add the angle to the point
+        });
+        
+        // Sort clockwise;
+        points.sort((a, b) => a.angle - b.angle);
+        
+        if(antiClockwise) {
+            const ccwPoints = points.reverse();
+
+            // move the last point back to the start
+            ccwPoints.unshift(ccwPoints.pop());
+            points = ccwPoints;
+        }
+        
+        return points.map((point) => {
+            return GeohashExtra.encodeFromLatLng(point.x, point.y, contour[0].length);
+        })
     }
 
     /**
@@ -25,10 +88,10 @@ module.exports = class GeohashContour {
      * @param operation
      * @returns [geohash]
      */
-    static overlay(redContour, blueContour, operation){
+    static overlay(redContour, blueContour, operation) {
         const redPoints = [], redEdges = [];
         const bluePoints = [], blueEdges = [];
-        
+
         redContour.map((geohash, index) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             redPoints.push([coors.lat, coors.lon]);
@@ -40,7 +103,7 @@ module.exports = class GeohashContour {
             bluePoints.push([coors.lat, coors.lon]);
             blueEdges.push([index, (blueContour.length - 1 === index) ? 0 : index + 1]);
         });
-        
+
         const overlayResult = overlayPslg(redPoints, redEdges, bluePoints, blueEdges, operation);
         return overlayResult.points.map((point) => {
             return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
@@ -59,21 +122,21 @@ module.exports = class GeohashContour {
             split: GeohashContour.overlay(baseContour, splitContour, "and")
         };
     }
-    
-    static mergePossible(baseContour, mergeContour){
+
+    static mergePossible(baseContour, mergeContour) {
         let mergePossible = false;
         baseContour.some(geohash => {
             mergePossible = mergePossible || mergeContour.indexOf(geohash) !== -1;
             return mergePossible;
         });
-        
-        if(mergePossible) {
+
+        if (mergePossible) {
             return mergePossible;
         }
 
         return GeohashContour.overlay(baseContour, mergeContour, "and").length > 0;
     }
-    
+
     /**
      * Merge contours and returns result contour
      * @param baseContour
@@ -82,12 +145,12 @@ module.exports = class GeohashContour {
      * @returns [geohash]
      */
     static mergeContours(baseContour, mergeContour, filterByDuplicates = true) {
-        if(!GeohashContour.mergePossible(baseContour, mergeContour)) {
+        if (!GeohashContour.mergePossible(baseContour, mergeContour)) {
             return [];
         }
         const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or");
-        
-        if(filterByDuplicates) {
+
+        if (filterByDuplicates) {
             return resultContour.filter(geohash => {
                 return baseContour.indexOf(geohash) === -1 || mergeContour.indexOf(geohash) === -1;
             });
@@ -95,7 +158,7 @@ module.exports = class GeohashContour {
             return resultContour;
         }
     }
-    
+
     static bboxes(contour, precision) {
         let maxLat;
         let minLat;
