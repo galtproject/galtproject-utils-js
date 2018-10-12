@@ -6,7 +6,7 @@ const geohashExtra = require("./geohashExtra.js");
 geohash.contour = geohashContour;
 geohash.extra = geohashExtra;
 
-module.exports = {
-    common,
-    geohash
-};
+const all = common;
+all.geohash = geohash;
+
+module.exports = all;
