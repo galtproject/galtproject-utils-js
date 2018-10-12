@@ -172,7 +172,7 @@ module.exports = class GeohashContour {
                 actualGeohashesToAdd.splice(actualGeohashesToAdd.indexOf(geohash), 1);
                 continue;
             }
-            const neighbour = Geohash.getNeighbour(geohash, existsGeohashesList);
+            const neighbour = Geohash.getNeighbourWithDirection(geohash, existsGeohashesList);
             if (!neighbour.geohash) {
                 continue;
             }

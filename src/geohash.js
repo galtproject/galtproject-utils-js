@@ -1,19 +1,25 @@
 module.exports = class Geohash {
-    static neighbourData = {
-        n: ['p0r21436x8zb9dcf5h7kjnmqesgutwvy', 'bc01fg45238967deuvhjyznpkmstqrwx'],
-        s: ['14365h7k9dcfesgujnmqp0r2twvyx8zb', '238967debc01fg45kmstqrwxuvhjyznp'],
-        e: ['bc01fg45238967deuvhjyznpkmstqrwx', 'p0r21436x8zb9dcf5h7kjnmqesgutwvy'],
-        w: ['238967debc01fg45kmstqrwxuvhjyznp', '14365h7k9dcfesgujnmqp0r2twvyx8zb'],
-    };
+    static get neighbourData() {
+        return {
+            n: ['p0r21436x8zb9dcf5h7kjnmqesgutwvy', 'bc01fg45238967deuvhjyznpkmstqrwx'],
+            s: ['14365h7k9dcfesgujnmqp0r2twvyx8zb', '238967debc01fg45kmstqrwxuvhjyznp'],
+            e: ['bc01fg45238967deuvhjyznpkmstqrwx', 'p0r21436x8zb9dcf5h7kjnmqesgutwvy'],
+            w: ['238967debc01fg45kmstqrwxuvhjyznp', '14365h7k9dcfesgujnmqp0r2twvyx8zb'],
+        };
+    }
 
-    static borderData = {
-        n: ['prxz', 'bcfguvyz'],
-        s: ['028b', '0145hjnp'],
-        e: ['bcfguvyz', 'prxz'],
-        w: ['0145hjnp', '028b'],
-    };
+    static get borderData() {
+        return {
+            n: ['prxz', 'bcfguvyz'],
+            s: ['028b', '0145hjnp'],
+            e: ['bcfguvyz', 'prxz'],
+            w: ['0145hjnp', '028b'],
+        };
+    }
 
-    static base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+    static get base32() {
+        return '0123456789bcdefghjkmnpqrstuvwxyz';
+    }
 
     /**
      * Get neighbour geohash by given direction.
@@ -231,6 +237,11 @@ module.exports = class Geohash {
         return geohash.slice(0, -1); // hash without last character
     }
 
+    /**
+     * Get full list of children geohashes by parent geohash
+     * @param parentGeohash
+     * @returns {Array}
+     */
     static getChildren(parentGeohash) {
         let indexOfChildSymbol = 0;
         const childrenGeohashes = [];
@@ -241,6 +252,12 @@ module.exports = class Geohash {
         return childrenGeohashes;
     }
 
+    /**
+     * Get list of possible parents for merge from children geohashes. 
+     * If all 32 children of parent exists - parent will be in list.
+     * @param geohashesList
+     * @returns {Array}
+     */
     static getFullParentsFromGeohashList(geohashesList) {
         const parentsForMerge = [];
         const parentsToChildren = {};
@@ -260,7 +277,14 @@ module.exports = class Geohash {
         return parentsForMerge;
     }
 
-    static getNeighbour(geohash, possibleNeighbours, directionRequired) {
+    /**
+     * Get first neighbour with direction from possibleNeighbours list
+     * @param geohash
+     * @param possibleNeighbours
+     * @param directionRequired
+     * @returns {{geohash: *, direction: *}}
+     */
+    static getNeighbourWithDirection(geohash, possibleNeighbours, directionRequired) {
         let resultGeohash;
         let resultDirection;
 
