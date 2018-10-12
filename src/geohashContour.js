@@ -3,18 +3,74 @@ const _ = require('lodash');
 const Geohash = require('./geohash');
 const GeohashExtra = require('./geohashExtra');
 const geojsonArea = require('@mapbox/geojson-area');
+const overlayPslg = require('overlay-pslg');
 
 module.exports = class GeohashContour {
     /**
      * Get area of geohashes contour in meters
      * @param contour
-     * @returns {*}
+     * @returns [lat, lon]
      */
     static area(contour){
         return geojsonArea.ring(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLng(geohash);
             return [coors.lat, coors.lon];
         }));
+    }
+
+    /**
+     * Overlay operations with contours
+     * @param redContour
+     * @param blueContour
+     * @param operation
+     * @returns [geohash]
+     */
+    static overlay(redContour, blueContour, operation){
+        const redPoints = [], redEdges = [];
+        const bluePoints = [], blueEdges = [];
+        
+        redContour.map((geohash, index) => {
+            const coors = GeohashExtra.decodeToLatLng(geohash);
+            redPoints.push([coors.lat, coors.lon]);
+            redEdges.push([index, (redContour.length - 1 === index) ? 0 : index + 1]);
+        });
+
+        blueContour.map((geohash, index) => {
+            const coors = GeohashExtra.decodeToLatLng(geohash);
+            bluePoints.push([coors.lat, coors.lon]);
+            blueEdges.push([index, (blueContour.length - 1 === index) ? 0 : index + 1]);
+        });
+        
+        const overlayResult = overlayPslg(redPoints, redEdges, bluePoints, blueEdges, operation);
+        return overlayResult.points.map((point) => {
+            return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
+        });
+    }
+
+    /**
+     * Split contours and returns result contours
+     * @param baseContour
+     * @param splitContour
+     * @returns {base, split}
+     */
+    static splitContours(baseContour, splitContour) {
+        return {
+            base: GeohashContour.overlay(baseContour, splitContour, "rsub"),
+            split: GeohashContour.overlay(baseContour, splitContour, "and")
+        };
+    }
+    
+    /**
+     * Merge contours and returns result contour
+     * @param baseContour
+     * @param mergeContour
+     * @returns [geohash]
+     */
+    static mergeContours(baseContour, mergeContour) {
+        const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or");
+        return resultContour.filter(geohash => {
+            return baseContour.indexOf(geohash) === -1 || mergeContour.indexOf(geohash) === -1;
+        });
     }
 
     /**

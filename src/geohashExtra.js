@@ -10,6 +10,12 @@ module.exports = class GeohashContour {
         const {latitude, longitude} = ngeohash.decode(geohash);
         return {lat: latitude, lon: longitude};
     }
+    static encodeFromLatLng(lat, lng, precision) {
+        if(!precision) {
+            precision = 'auto';
+        }
+        return ngeohash.encode(lat, lng, precision);
+    }
 
     static sortGeohashesByNeighbourDirection(existsGeohashesList, geohashesToAddList) {
         if (!geohashesToAddList.length) {
