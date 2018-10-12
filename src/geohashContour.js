@@ -95,25 +95,15 @@ module.exports = class GeohashContour {
             return resultContour;
         }
     }
-
-    /**
-     * Find geohash, which contains in contour by geohash precision
-     * @param contour
-     * @param precision
-     * @param processCallback
-     * @returns {Array}
-     */
-    static approximate(contour, precision, processCallback) {
+    
+    static bboxes(contour, precision) {
         let maxLat;
         let minLat;
         let maxLon;
         let minLon;
 
-        const polygon = [];
-
         contour.forEach((geohash) => {
             const coordinates = GeohashExtra.decodeToLatLon(geohash);
-            polygon.push([coordinates.lat, coordinates.lon]);
 
             if (_.isNil(maxLat) || coordinates.lat > maxLat) {
                 maxLat = coordinates.lat;
@@ -129,7 +119,23 @@ module.exports = class GeohashContour {
             }
         });
 
-        const allGeohashes = ngeohash.bboxes(minLat, minLon, maxLat, maxLon, precision);
+        return ngeohash.bboxes(minLat, minLon, maxLat, maxLon, precision);
+    }
+
+    /**
+     * Find geohash, which contains in contour by geohash precision
+     * @param contour
+     * @param precision
+     * @param processCallback
+     * @returns {Array}
+     */
+    static approximate(contour, precision, processCallback) {
+        const polygon = contour.map((geohash) => {
+            const coordinates = GeohashExtra.decodeToLatLon(geohash);
+            return [coordinates.lat, coordinates.lon];
+        });
+
+        const allGeohashes = GeohashContour.bboxes(contour, precision);
 
         const geohashesInside = [];
         const parentsToChildren = {};
