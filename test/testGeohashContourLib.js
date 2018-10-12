@@ -1,7 +1,7 @@
 const geohashContourUtils = require('../src/geohashContour');
 const assert = require('assert');
 
-describe.only('geohashContour utils', () => {
+describe('geohashContour utils', () => {
     it('should correct approximate', function () {
         const containsGeohashes = geohashContourUtils.approximate(["w9cx6wbuuyu", "w9cx7qpmkt3", "w9cwg7dkdrp"], 6);
 
