@@ -20,10 +20,6 @@ describe('geohash utils', () => {
         assert.equal(geohashUtils.isNeighbourOnDiffLevel("gfp", "u40", "e"), false);
         assert.equal(geohashUtils.isNeighbourOnDiffLevel("gfp8", "u40", "e"), false);
 
-        assert.equal(geohashUtils.getGeohashBorder("gfpb"), "se");
-        assert.equal(geohashUtils.getGeohashBorder("gfp8"), "s");
-        assert.equal(geohashUtils.getGeohashBorder("gfpe"), null);
-
         assert.deepEqual(geohashUtils.getNeighbourWithDirection("gfpe", ["u40", "gfpg", "gfpf"]), {geohash: "gfpg", direction: "e"});
     });
 
