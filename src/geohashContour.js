@@ -25,6 +25,9 @@ module.exports = class GeohashContour {
      * @returns {*}
      */
     static sortClockwise(contour, antiClockwise = false) {
+        if(!contour.length || contour.length === 1) {
+            return contour;
+        }
         let points = contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             return {x: coors.lat, y: coors.lon};
