@@ -1,3 +1,6 @@
+/**
+ * Pure geohash operations based on symbols relations in geohash concept, without using any libs.
+ */
 module.exports = class Geohash {
     static get neighbourData() {
         return {
@@ -43,22 +46,6 @@ module.exports = class Geohash {
         return parent + Geohash.base32.charAt(this.neighbourData[direction][type].indexOf(lastCh));
     }
 
-    static getChildByDirection(geohash, direction) {
-        if (direction.length !== 2) {
-            return null;
-        }
-
-        const firstDirection = direction[0];
-        const secondDirection = direction[1];
-
-        const type = (geohash.length + 1) % 2;
-
-        const firstDirectionSymbols = this.borderData[firstDirection][type];
-        const secondDirectionSymbols = this.borderData[secondDirection][type];
-
-        return geohash + _.intersection(firstDirectionSymbols.split(''), secondDirectionSymbols.split(''));
-    }
-
     /**
      * Returns all 8 neighbours geohashes by specified geohash.
      *
@@ -79,6 +66,13 @@ module.exports = class Geohash {
         ];
     }
 
+    /**
+     * Get direction between geohash and neighbour
+     * 
+     * @param geohash
+     * @param neighbour
+     * @returns {*}
+     */
     static directionOfNeighbour(geohash, neighbour) {
         if (geohash.length > neighbour.length) {
             geohash = geohash.slice(0, neighbour.length);
@@ -103,6 +97,15 @@ module.exports = class Geohash {
         }
     }
 
+    /**
+     * Get neighbour on diff precision levels, for example: "u40" and "u410" with direction "e".
+     * WARNING: Supports only 1 precision diff in levels.
+     * 
+     * @param geohash
+     * @param neighbour
+     * @param direction
+     * @returns {boolean}
+     */
     static isNeighbourOnDiffLevel(geohash, neighbour, direction) {
         const lengthDiff = geohash.length - neighbour.length;
         if (Math.abs(lengthDiff) > 1) {
@@ -239,6 +242,7 @@ module.exports = class Geohash {
 
     /**
      * Get full list of children geohashes by parent geohash
+     * 
      * @param parentGeohash
      * @returns {Array}
      */
@@ -253,8 +257,62 @@ module.exports = class Geohash {
     }
 
     /**
+     * Get children list by one-side direction. 
+     * For example: "gfp" have ["gfp0", "gfp1", "gfp4", "gfp5", "gfph", "gfpj", "gfpn", "gfpp"] children on "w" direction
+     * @param geohash
+     * @param direction
+     * @returns {*}
+     */
+    static getChildrenByDirection(geohash, direction) {
+        if (direction.length !== 1) {
+            return null;
+        }
+
+        const type = (geohash.length + 1) % 2;
+
+        const firstDirectionSymbols = Geohash.borderData[direction][type].split('');
+        return firstDirectionSymbols.map((symbol) => {
+            return geohash + symbol;
+        });
+    }
+
+    /**
+     * Get child by two-sides direction. For example: "gfp" have "gfp0" child on "sw" direction 
+     * @param geohash
+     * @param direction
+     * @returns {*}
+     */
+    static getChildByDirection(geohash, direction) {
+        if (direction.length !== 2) {
+            return null;
+        }
+
+        const firstDirection = direction[0];
+        const secondDirection = direction[1];
+
+        const type = (geohash.length + 1) % 2;
+
+        const firstDirectionSymbols = Geohash.borderData[firstDirection][type].split('');
+        const secondDirectionSymbols = Geohash.borderData[secondDirection][type].split('');
+
+        let resultSymbol;
+        firstDirectionSymbols.some((fdSymbol) => {
+            const intersection = secondDirectionSymbols.indexOf(fdSymbol) !== -1;
+            if(intersection) {
+                resultSymbol = fdSymbol;
+            }
+            return fdSymbol;
+        });
+        if(!resultSymbol) {
+            return null;
+        }
+        return geohash + resultSymbol;
+    }
+
+    /**
      * Get list of possible parents for merge from children geohashes. 
      * If all 32 children of parent exists - parent will be in list.
+     * 
      * @param geohashesList
      * @returns {Array}
      */
@@ -279,6 +337,7 @@ module.exports = class Geohash {
 
     /**
      * Get first neighbour with direction from possibleNeighbours list
+     * 
      * @param geohash
      * @param possibleNeighbours
      * @param directionRequired

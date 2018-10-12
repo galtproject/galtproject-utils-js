@@ -1,17 +1,13 @@
 const ngeohash = require('ngeohash');
 const _ = require('lodash');
 const Geohash = require('./geohash');
+const GeohashExtra = require('./geohashExtra');
 const geojsonArea = require('@mapbox/geojson-area');
 
 module.exports = class GeohashContour {
-    static decodeToLatLng(geohash) {
-        const {latitude, longitude} = ngeohash.decode(geohash);
-        return {lat: latitude, lon: longitude};
-    }
-
     static geohashesPolygonArea(contour){
         return geojsonArea.ring(contour.map((geohash) => {
-            const coors = GeohashContour.decodeToLatLng(geohash);
+            const coors = GeohashExtra.decodeToLatLng(geohash);
             return [coors.lat, coors.lon];
         }));
     }
@@ -25,7 +21,7 @@ module.exports = class GeohashContour {
         const polygon = [];
 
         contour.forEach((geohash) => {
-            const coordinates = GeohashContour.decodeToLatLng(geohash);
+            const coordinates = GeohashExtra.decodeToLatLng(geohash);
             polygon.push([coordinates.lat, coordinates.lon]);
 
             if (_.isNil(maxLat) || coordinates.lat > maxLat) {
@@ -50,7 +46,7 @@ module.exports = class GeohashContour {
 
         allGeohashes.forEach((geohash, index) => {
 
-            if (Geohash.isGeohashInsidePolygon(geohash, polygon)) {
+            if (GeohashContour.isGeohashInsidePolygon(geohash, polygon)) {
 
                 geohashesInside.push(geohash);
 
@@ -104,15 +100,15 @@ module.exports = class GeohashContour {
         const nwChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'nw'), 'nw');
         const swChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'sw'), 'sw');
 
-        const neCoor = GeohashContour.decodeToLatLng(neChild);
-        const seCoor = GeohashContour.decodeToLatLng(seChild);
-        const nwCoor = GeohashContour.decodeToLatLng(nwChild);
-        const swCoor = GeohashContour.decodeToLatLng(swChild);
+        const neCoor = GeohashExtra.decodeToLatLng(neChild);
+        const seCoor = GeohashExtra.decodeToLatLng(seChild);
+        const nwCoor = GeohashExtra.decodeToLatLng(nwChild);
+        const swCoor = GeohashExtra.decodeToLatLng(swChild);
 
-        return Geohash.isInside([neCoor.lat, neCoor.lon], polygon)
-            && Geohash.isInside([seCoor.lat, seCoor.lon], polygon)
-            && Geohash.isInside([nwCoor.lat, nwCoor.lon], polygon)
-            && Geohash.isInside([swCoor.lat, swCoor.lon], polygon);
+        return GeohashContour.isInside([neCoor.lat, neCoor.lon], polygon)
+            && GeohashContour.isInside([seCoor.lat, seCoor.lon], polygon)
+            && GeohashContour.isInside([nwCoor.lat, nwCoor.lon], polygon)
+            && GeohashContour.isInside([swCoor.lat, swCoor.lon], polygon);
     }
 
     // https://github.com/substack/point-in-polygon
@@ -143,84 +139,12 @@ module.exports = class GeohashContour {
         const polygon = [];
 
         contour.forEach((geohash) => {
-            const coordinates = GeohashContour.decodeToLatLng(geohash);
+            const coordinates = GeohashExtra.decodeToLatLng(geohash);
             polygon.push([coordinates.lat, coordinates.lon]);
         });
 
         return geohashes.filter((geohash) => {
-            return Geohash.isGeohashInsidePolygon(geohash, polygon);
+            return GeohashContour.isGeohashInsidePolygon(geohash, polygon);
         })
-    }
-
-    static sortGeohashesByNeighbourDirection(existsGeohashesList, geohashesToAddList) {
-        if (!geohashesToAddList.length) {
-            return geohashesToAddList;
-        }
-
-        existsGeohashesList = _.clone(existsGeohashesList);
-        let actualGeohashesToAdd = _.clone(geohashesToAddList);
-
-        let preparedGeohashes = [];
-        let i = 0;
-        while (preparedGeohashes.length < geohashesToAddList.length) {
-            const geohash = geohashesToAddList[i];
-            i++;
-            if (!geohash) {
-                break;
-            }
-            if (_.includes(existsGeohashesList, geohash)) {
-                actualGeohashesToAdd.splice(actualGeohashesToAdd.indexOf(geohash), 1);
-                continue;
-            }
-            const neighbour = Geohash.getNeighbourWithDirection(geohash, existsGeohashesList);
-            if (!neighbour.geohash) {
-                continue;
-            }
-            preparedGeohashes.push({
-                geohash: geohash,
-                neighbour: neighbour.geohash,
-                direction: neighbour.direction
-            });
-            existsGeohashesList.push(geohash);
-            actualGeohashesToAdd.splice(actualGeohashesToAdd.indexOf(geohash), 1);
-        }
-
-        if (preparedGeohashes.length > 0 && actualGeohashesToAdd.length > 0) {
-            const additionalPreparedGeohashes = Geohash.sortGeohashesByNeighbourDirection(existsGeohashesList, actualGeohashesToAdd);
-            if (additionalPreparedGeohashes.length) {
-                preparedGeohashes = _.concat(additionalPreparedGeohashes, preparedGeohashes);
-            }
-        }
-
-        return preparedGeohashes;
-    }
-
-
-    static sortGeohashesByFreeTwoDirections(geohashesToRemoveList) {
-        if (!geohashesToRemoveList.length) {
-            return geohashesToRemoveList;
-        }
-
-        geohashesToRemoveList = _.uniq(geohashesToRemoveList);
-
-        let preparedGeohashes = [];
-        let i = 0;
-        while (preparedGeohashes.length < geohashesToRemoveList.length) {
-            const geohash = geohashesToRemoveList[i];
-            i++;
-            if (!geohash) {
-                break;
-            }
-
-            // TODO: add algorithm for get geohashes in order without neighbour in two directions
-
-            preparedGeohashes.push({
-                geohash: geohash,
-                direction1: 'e',
-                direction2: 's'
-            });
-        }
-
-        return preparedGeohashes;
     }
 };
