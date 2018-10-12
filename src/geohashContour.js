@@ -5,13 +5,25 @@ const GeohashExtra = require('./geohashExtra');
 const geojsonArea = require('@mapbox/geojson-area');
 
 module.exports = class GeohashContour {
-    static geohashesPolygonArea(contour){
+    /**
+     * Get area of geohashes contour in meters
+     * @param contour
+     * @returns {*}
+     */
+    static area(contour){
         return geojsonArea.ring(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLng(geohash);
             return [coors.lat, coors.lon];
         }));
     }
-    
+
+    /**
+     * Find geohash, which contains in contour by geohash precision
+     * @param contour
+     * @param precision
+     * @param processCallback
+     * @returns {Array}
+     */
     static approximate(contour, precision, processCallback) {
         let maxLat;
         let minLat;
@@ -45,9 +57,7 @@ module.exports = class GeohashContour {
         const parentsForMerge = [];
 
         allGeohashes.forEach((geohash, index) => {
-            console.log('geohash', geohash);
-
-            if (GeohashContour.isGeohashInsidePolygon(geohash, polygon)) {
+            if (GeohashContour.isGeohashInside(geohash, polygon)) {
 
                 geohashesInside.push(geohash);
 
@@ -95,7 +105,7 @@ module.exports = class GeohashContour {
         return geohashesInside;
     }
 
-    static isGeohashInsidePolygon(geohash, polygon) {
+    static isGeohashInside(geohash, latLngPolygon) {
         const neChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'ne'), 'ne');
         const seChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'se'), 'se');
         const nwChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'nw'), 'nw');
@@ -106,10 +116,10 @@ module.exports = class GeohashContour {
         const nwCoor = GeohashExtra.decodeToLatLng(nwChild);
         const swCoor = GeohashExtra.decodeToLatLng(swChild);
 
-        return GeohashContour.isInside([neCoor.lat, neCoor.lon], polygon)
-            && GeohashContour.isInside([seCoor.lat, seCoor.lon], polygon)
-            && GeohashContour.isInside([nwCoor.lat, nwCoor.lon], polygon)
-            && GeohashContour.isInside([swCoor.lat, swCoor.lon], polygon);
+        return GeohashContour.isInside([neCoor.lat, neCoor.lon], latLngPolygon)
+            && GeohashContour.isInside([seCoor.lat, seCoor.lon], latLngPolygon)
+            && GeohashContour.isInside([nwCoor.lat, nwCoor.lon], latLngPolygon)
+            && GeohashContour.isInside([swCoor.lat, swCoor.lon], latLngPolygon);
     }
 
     // https://github.com/substack/point-in-polygon
@@ -136,7 +146,13 @@ module.exports = class GeohashContour {
         return inside;
     }
 
-    static filterByInsideContour(geohashes, contour) {
+    /**
+     * Filter geohashes list by contains in contour
+     * @param geohashes
+     * @param contour
+     * @returns {*}
+     */
+    static filterByInside(geohashes, contour) {
         const polygon = [];
 
         contour.forEach((geohash) => {
@@ -145,7 +161,7 @@ module.exports = class GeohashContour {
         });
 
         return geohashes.filter((geohash) => {
-            return GeohashContour.isGeohashInsidePolygon(geohash, polygon);
+            return GeohashContour.isGeohashInside(geohash, polygon);
         })
     }
 };

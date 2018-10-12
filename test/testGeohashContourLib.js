@@ -10,9 +10,7 @@ describe('geohashContour utils', () => {
     });
     
     it('should correct filter by inside contour', function () {
-        assert.deepEqual(geohashContourUtils.filterByInsideContour([ 'w9cx5h', 'w9cx5j', 'gfpb'], 
+        assert.deepEqual(geohashContourUtils.filterByInside([ 'w9cx5h', 'w9cx5j', 'gfpb'], 
             ["w9cx6wbuuyu", "w9cx7qpmkt3", "w9cwg7dkdrp"]), ['w9cx5h', 'w9cx5j']);
     });
-    
-    
 });
