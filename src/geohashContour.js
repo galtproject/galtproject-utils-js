@@ -13,7 +13,7 @@ module.exports = class GeohashContour {
      */
     static area(contour){
         return geojsonArea.ring(contour.map((geohash) => {
-            const coors = GeohashExtra.decodeToLatLng(geohash);
+            const coors = GeohashExtra.decodeToLatLon(geohash);
             return [coors.lat, coors.lon];
         }));
     }
@@ -30,13 +30,13 @@ module.exports = class GeohashContour {
         const bluePoints = [], blueEdges = [];
         
         redContour.map((geohash, index) => {
-            const coors = GeohashExtra.decodeToLatLng(geohash);
+            const coors = GeohashExtra.decodeToLatLon(geohash);
             redPoints.push([coors.lat, coors.lon]);
             redEdges.push([index, (redContour.length - 1 === index) ? 0 : index + 1]);
         });
 
         blueContour.map((geohash, index) => {
-            const coors = GeohashExtra.decodeToLatLng(geohash);
+            const coors = GeohashExtra.decodeToLatLon(geohash);
             bluePoints.push([coors.lat, coors.lon]);
             blueEdges.push([index, (blueContour.length - 1 === index) ? 0 : index + 1]);
         });
@@ -112,7 +112,7 @@ module.exports = class GeohashContour {
         const polygon = [];
 
         contour.forEach((geohash) => {
-            const coordinates = GeohashExtra.decodeToLatLng(geohash);
+            const coordinates = GeohashExtra.decodeToLatLon(geohash);
             polygon.push([coordinates.lat, coordinates.lon]);
 
             if (_.isNil(maxLat) || coordinates.lat > maxLat) {
@@ -190,10 +190,10 @@ module.exports = class GeohashContour {
         const nwChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'nw'), 'nw');
         const swChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'sw'), 'sw');
 
-        const neCoor = GeohashExtra.decodeToLatLng(neChild);
-        const seCoor = GeohashExtra.decodeToLatLng(seChild);
-        const nwCoor = GeohashExtra.decodeToLatLng(nwChild);
-        const swCoor = GeohashExtra.decodeToLatLng(swChild);
+        const neCoor = GeohashExtra.decodeToLatLon(neChild);
+        const seCoor = GeohashExtra.decodeToLatLon(seChild);
+        const nwCoor = GeohashExtra.decodeToLatLon(nwChild);
+        const swCoor = GeohashExtra.decodeToLatLon(swChild);
 
         return GeohashContour.isInside([neCoor.lat, neCoor.lon], latLngPolygon)
             && GeohashContour.isInside([seCoor.lat, seCoor.lon], latLngPolygon)
@@ -235,7 +235,7 @@ module.exports = class GeohashContour {
         const polygon = [];
 
         contour.forEach((geohash) => {
-            const coordinates = GeohashExtra.decodeToLatLng(geohash);
+            const coordinates = GeohashExtra.decodeToLatLon(geohash);
             polygon.push([coordinates.lat, coordinates.lon]);
         });
 
