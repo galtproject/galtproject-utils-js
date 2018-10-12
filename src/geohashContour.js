@@ -60,6 +60,20 @@ module.exports = class GeohashContour {
         };
     }
     
+    static mergePossible(baseContour, mergeContour){
+        let mergePossible = false;
+        baseContour.some(geohash => {
+            mergePossible = mergePossible || mergeContour.indexOf(geohash) !== -1;
+            return mergePossible;
+        });
+        
+        if(mergePossible) {
+            return mergePossible;
+        }
+
+        return GeohashContour.overlay(baseContour, mergeContour, "and").length > 0;
+    }
+    
     /**
      * Merge contours and returns result contour
      * @param baseContour
@@ -68,6 +82,9 @@ module.exports = class GeohashContour {
      * @returns [geohash]
      */
     static mergeContours(baseContour, mergeContour, filterByDuplicates = true) {
+        if(!GeohashContour.mergePossible(baseContour, mergeContour)) {
+            return [];
+        }
         const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or");
         
         if(filterByDuplicates) {
