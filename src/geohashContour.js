@@ -12,10 +12,10 @@ module.exports = class GeohashContour {
      * @returns [lat, lon]
      */
     static area(contour) {
-        return geojsonArea.ring(contour.map((geohash) => {
+        return Math.abs(geojsonArea.ring(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             return [coors.lat, coors.lon];
-        }));
+        })));
     }
 
     /**
