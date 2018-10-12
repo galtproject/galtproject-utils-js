@@ -197,6 +197,7 @@ module.exports = {
     tokenIdHexToGeohash5,
     tokenIdHexToGeohash,
     tokenIdToHex,
+    tokenIdHexToTokenId,
     ipfsHashToBytes32,
     bytes32ToIpfsHash,
     isPack,
