@@ -1,4 +1,4 @@
-const utils = require('../');
+const utils = require('../src/common');
 const assert = require('assert');
 
 describe('#ipfsHashToBytes32()', () => {

@@ -1,4 +1,4 @@
-const utils = require('../');
+const utils = require('../src/common');
 const BN = require('bn.js');
 const assert = require('assert');
 
@@ -92,6 +92,15 @@ describe('#isPack()', () => {
 // TokenId: 452312848583266388373324160190187140051835877600158453279131187561047470792
 // Geohash5: 30136808136
 // Geohash: w24qdq8
+
+describe('#tokenIdToHex()', () => {
+    it('should convert tokenId to hex', function() {
+        assert.equal(utils.tokenIdToHex("452312848583266388373324160190187140051835877600158453279131187561047470792"), '0x01000000000000000000000000000000000000000000000000000007044b32c8');
+    });
+    it('should convert hex to tokenId', function() {
+        assert.equal(utils.tokenIdHexToTokenId("0x01000000000000000000000000000000000000000000000000000007044b32c8"), '452312848583266388373324160190187140051835877600158453279131187561047470792');
+    });
+});
 
 describe('#geohashToTokenId()', () => {
     it('should convert geohash to tokenId', function() {
