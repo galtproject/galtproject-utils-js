@@ -127,54 +127,36 @@ module.exports = class GeohashContour {
         if(!edges.length) {
             return points;
         }
-        const edgeBeginningsCount = {};
-
-        edges.forEach(edge => {
-            const beginning = edge[0];
-            
-            if(edgeBeginningsCount[beginning]) {
-                edgeBeginningsCount[beginning]++;
-            } else {
-                edgeBeginningsCount[beginning] = 1;
-            }
-        });
         
-        const edgeBeginToEnd = {};
-
-        edges = edges.map(edge => {
-            const beginning = edge[0];
-            const end = edge[1];
-
-            if(edgeBeginningsCount[beginning] > 1) {
-                if(!edgeBeginningsCount[end]) {
-                    edgeBeginningsCount[beginning]--;
-                    edgeBeginningsCount[end] = 1;
-
-                    edge = [edge[1], edge[0]];
-                }
-            }
-
-            edgeBeginToEnd[edge[0]] = edge[1];
-            
-            return edge;
-        });
+        const edgesStack = edges.map(edge => edge);
         
         let sortedPoints = [];
         
-        const firstEdge = edges[0][0];
+        const firstEdge = edges[0];
         
         addPointByEdge(firstEdge);
         
-        function addPointByEdge(beginEdge, i = 0) {
-            if(beginEdge === firstEdge && i > 0) {
+        function addPointByEdge(addEdge, i = 0) {
+            if(addEdge[0] === firstEdge[0] && i > 0) {
                 return;
             }
             if(i > points.length) {
                 sortedPoints = points;
                 return;
             }
-            sortedPoints.push(points[beginEdge]);
-            addPointByEdge(edgeBeginToEnd[beginEdge], ++i);
+            sortedPoints.push(points[addEdge[0]]);
+            
+            let nextEdge;
+            const foundEdgeByBeginning = _.find(edgesStack, (edge) => edge[0] === addEdge[1]);
+            if(foundEdgeByBeginning) {
+                nextEdge = foundEdgeByBeginning;
+                edgesStack.splice(edgesStack.indexOf(foundEdgeByBeginning), 1);
+            } else {
+                const foundEdgeByEnd = _.find(edgesStack, (edge) => edge[1] === addEdge[1] && edge[0] !== addEdge[0]);
+                nextEdge = [foundEdgeByEnd[1], foundEdgeByEnd[0]];
+                edgesStack.splice(edgesStack.indexOf(foundEdgeByEnd), 1);
+            }
+            addPointByEdge(nextEdge, ++i);
         }
         
         return sortedPoints;
