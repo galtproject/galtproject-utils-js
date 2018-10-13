@@ -95,22 +95,83 @@ module.exports = class GeohashContour {
         const redPoints = [], redEdges = [];
         const bluePoints = [], blueEdges = [];
 
-        redContour.map((geohash, index) => {
+        redContour.forEach((geohash, index) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             redPoints.push([coors.lat, coors.lon]);
             redEdges.push([index, (redContour.length - 1 === index) ? 0 : index + 1]);
         });
 
-        blueContour.map((geohash, index) => {
+        blueContour.forEach((geohash, index) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             bluePoints.push([coors.lat, coors.lon]);
             blueEdges.push([index, (blueContour.length - 1 === index) ? 0 : index + 1]);
         });
 
         const overlayResult = overlayPslg(redPoints, redEdges, bluePoints, blueEdges, operation);
-        return overlayResult.points.map((point) => {
+        const concatEdges = overlayResult.blue.concat(overlayResult.red);
+        
+        const sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        
+        return sortedPoints.map((point) => {
             return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
         });
+    }
+
+    /**
+     * Sort points array by edges array of overlay operation
+     * @param points
+     * @param edges
+     * @returns {Array}
+     */
+    static pointsSortByEdges(points, edges) {
+        const edgeBeginningsCount = {};
+
+        edges.forEach(edge => {
+            const beginning = edge[0];
+            
+            if(edgeBeginningsCount[beginning]) {
+                edgeBeginningsCount[beginning]++;
+            } else {
+                edgeBeginningsCount[beginning] = 1;
+            }
+        });
+        
+        const edgeBeginToEnd = {};
+
+        edges = edges.map(edge => {
+            const beginning = edge[0];
+            const end = edge[1];
+
+            if(edgeBeginningsCount[beginning] > 1) {
+                if(!edgeBeginningsCount[end]) {
+                    edgeBeginningsCount[beginning]--;
+                    edgeBeginningsCount[end] = 1;
+
+                    edge = [edge[1], edge[0]];
+                }
+            }
+
+            edgeBeginToEnd[edge[0]] = edge[1];
+            
+            return edge;
+        });
+        
+        const sortedPoints = [];
+        
+        const firstEdge = edges[0][0];
+        
+        addPointByEdge(firstEdge);
+        
+        function addPointByEdge(beginEdge) {
+            sortedPoints.push(points[beginEdge]);
+            
+            if(beginEdge === firstEdge) {
+                return;
+            }
+            addPointByEdge(edgeBeginToEnd[beginEdge]);
+        }
+        
+        return sortedPoints;
     }
 
     /**
