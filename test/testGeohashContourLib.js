@@ -17,9 +17,10 @@ describe('geohashContour utils', () => {
     it('should correct split and merge', function () {
         let splitResult = geohashContourUtils.splitContours(["w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"], ["w9cx6r8hun8", "w9cx61yk800", "w9cx73ghs00", "w9cx7rfxspb"]);
         
+        console.log(splitResult);
         assert.deepEqual(splitResult, {
-            base: [ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ],
-            split: [ 'w9cx6wbuuyu', 'w9cx63zs884', 'w9cx71gk90n' ]
+            base: [ 'w9cx63zs884', 'w9cx71gk90n', 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m' ],
+            split: [ 'w9cx63zs884', 'w9cx71gk90n', 'w9cx6wbuuyu']
         });
 
         splitResult = geohashContourUtils.splitContours(["w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"], [ "u401", "u410", "u411" ]);

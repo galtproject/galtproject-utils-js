@@ -124,6 +124,9 @@ module.exports = class GeohashContour {
      * @returns {Array}
      */
     static pointsSortByEdges(points, edges) {
+        if(!edges.length) {
+            return points;
+        }
         const edgeBeginningsCount = {};
 
         edges.forEach(edge => {
@@ -156,19 +159,22 @@ module.exports = class GeohashContour {
             return edge;
         });
         
-        const sortedPoints = [];
+        let sortedPoints = [];
         
         const firstEdge = edges[0][0];
         
         addPointByEdge(firstEdge);
         
-        function addPointByEdge(beginEdge) {
-            sortedPoints.push(points[beginEdge]);
-            
-            if(beginEdge === firstEdge) {
+        function addPointByEdge(beginEdge, i = 0) {
+            if(beginEdge === firstEdge && i > 0) {
                 return;
             }
-            addPointByEdge(edgeBeginToEnd[beginEdge]);
+            if(i > points.length) {
+                sortedPoints = points;
+                return;
+            }
+            sortedPoints.push(points[beginEdge]);
+            addPointByEdge(edgeBeginToEnd[beginEdge], ++i);
         }
         
         return sortedPoints;
