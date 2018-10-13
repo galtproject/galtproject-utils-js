@@ -33,7 +33,7 @@ describe('geohashContour utils', () => {
 
         assert.deepEqual(splitResult, {
             base: [ "w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m" ],
-            split: [  ]
+            split: [ "u401", "u410", "u411" ]
         });
 
         let mergeResult = geohashContourUtils.mergeContours([ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ], [ 'w9cx6wbuuyu', 'w9cx63zs884', 'w9cx71gk90n' ]);

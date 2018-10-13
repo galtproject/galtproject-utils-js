@@ -162,6 +162,20 @@ module.exports = class GeohashContour {
         return sortedPoints;
     }
 
+    static splitPossible(baseContour, splitContour) {
+        const intersects = GeohashContour.overlay(baseContour, splitContour, "and").length;
+        if(!intersects) {
+            return false;
+        }
+
+        const rest = GeohashContour.overlay(baseContour, splitContour, "sub").length;
+        if(!rest) {
+            return false;
+        }
+        
+        return true;
+    }
+
     /**
      * Split contours and returns result contours
      * @param baseContour
@@ -169,6 +183,12 @@ module.exports = class GeohashContour {
      * @returns {base, split}
      */
     static splitContours(baseContour, splitContour) {
+        if(!GeohashContour.splitPossible(baseContour, splitContour)) {
+            return {
+                base: baseContour,
+                split: splitContour
+            };
+        }
         return {
             base: GeohashContour.overlay(baseContour, splitContour, "rsub"),
             split: GeohashContour.overlay(baseContour, splitContour, "and")
