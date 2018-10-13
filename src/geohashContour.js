@@ -162,6 +162,12 @@ module.exports = class GeohashContour {
         return sortedPoints;
     }
 
+    /**
+     * Check - is split possible for two contours
+     * @param baseContour
+     * @param splitContour
+     * @returns {boolean}
+     */
     static splitPossible(baseContour, splitContour) {
         const intersects = GeohashContour.overlay(baseContour, splitContour, "and").length;
         if(!intersects) {
