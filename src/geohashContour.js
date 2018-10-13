@@ -175,6 +175,12 @@ module.exports = class GeohashContour {
         };
     }
 
+    /**
+     * Check - is merge possible for two contours
+     * @param baseContour
+     * @param mergeContour
+     * @returns {boolean}
+     */
     static mergePossible(baseContour, mergeContour) {
         let mergePossible = false;
         baseContour.some(geohash => {
