@@ -179,26 +179,25 @@ module.exports = class GeohashContour {
             return false;
         }
 
-        const intersectsMoreThenTwoTimes = baseContour.some((geohash, index) => {
-            if(index === 0) {
-                return;
-            }
+        const firstContour = splitContour;
+        const secondContour = baseContour;
+
+        const intersectsMoreThenTwoTimes = firstContour.some((firstContourGeohash, firstContourIndex) => {
+            const firstContourGeohash1 = firstContourGeohash;
+            const firstContourGeohash2 = firstContour[firstContourIndex + 1 < firstContour.length ? firstContourIndex + 1 : 0];
             
-            const baseContourGeohash1 = geohash;
-            const baseContourGeohash2 = baseContour[index - 1];
-            
-            const intersectsCount = splitContour.filter((splitGeohash, index) => {
-                if(index === 0) {
+            const intersectsCount = secondContour.filter((secondContourGeohash, secondContourIndex) => {
+                if(secondContourIndex === 0) {
                     return;
                 }
-                const splitContourGeohash1 = splitGeohash;
-                const splitContourGeohash2 = baseContour[index - 1];
+                const secondContourGeohash1 = secondContourGeohash;
+                const secondContourGeohash2 = secondContour[secondContourIndex + 1 < secondContour.length ? secondContourIndex + 1 : 0];
                 
                 return GeohashContour.intersectsGeohashesLines(
-                    baseContourGeohash1,
-                    baseContourGeohash2,
-                    splitContourGeohash1,
-                    splitContourGeohash2
+                    firstContourGeohash1,
+                    firstContourGeohash2,
+                    secondContourGeohash1,
+                    secondContourGeohash2
                 );
             }).length;
             return intersectsCount > 1;
