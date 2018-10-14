@@ -18,23 +18,52 @@ describe('geohashContour utils', () => {
         let splitResult = geohashContourUtils.splitContours(["w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"], ["w9cx6r8hun8", "w9cx61yk800", "w9cx73ghs00", "w9cx7rfxspb"]);
         
         assert.deepEqual(splitResult, {
-            base: [ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ],
-            split: [ 'w9cx6wbuuyu', 'w9cx63zs884', 'w9cx71gk90n' ]
+            base: [ 'w9cx63zs884', 'w9cx71gk90n', 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m' ],
+            split: [ 'w9cx63zs884', 'w9cx71gk90n', 'w9cx6wbuuyu']
         });
 
-        splitResult = geohashContourUtils.splitContours(["w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"], [ "u401", "u410", "u411" ]);
+        splitResult = geohashContourUtils.splitContours(["w24q8wyzcj3", "w24q8tzncuz", "w24q8w5b8bx", "w24q8wgu6ux"], ["w24q8wdrn06", "w24q8wsd109", "w24q8w69s0d"]);
 
         assert.deepEqual(splitResult, {
-            base: [ "w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m" ],
-            split: [  ]
+            base: [ 'w24q8wsd109', 'w24q8w7yf1b', 'w24q8w5b8bx', 'w24q8tzncuz', 'w24q8wyzcj3', 'w24q8wgu6ux', 'w24q8wegdqe'],
+            split: [ "w24q8wsd109", "w24q8w7yf1b", "w24q8wegdqe" ]
         });
+        
+        /*
+               _
+          _   |_|
+         |_|
+           
+         */
+        const notIntersectContoursSplitPossible = geohashContourUtils.splitPossible(["w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"], [ "u401", "u410", "u411" ]);
 
+        assert.equal(notIntersectContoursSplitPossible,false);
+        
+        /*
+            _
+          _| |_
+         |_| |_|
+           |_|
+         */
+        console.log('intersectContoursSplitPossible START')
+        const intersectContoursSplitPossible = geohashContourUtils.splitPossible(["w24q8w5b8bx", "w24q8tzncuz", "w24q8wyzcj3", "w24q8wgu6ux"], ["w24q8wdkjb6", "w24q8wxm7b7", "w24q8y2jcbt", "w24q8w4w7bd"]);
+        assert.equal(intersectContoursSplitPossible, false);
+        console.log('intersectContoursSplitPossible END')
+        
         let mergeResult = geohashContourUtils.mergeContours([ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ], [ 'w9cx6wbuuyu', 'w9cx63zs884', 'w9cx71gk90n' ]);
 
-        assert.deepEqual(mergeResult, [ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx6wbuuyu' ]);
+        assert.deepEqual(mergeResult, [ 'w9cx6wbuuyu', 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m' ]);
 
         mergeResult = geohashContourUtils.mergeContours([ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ], [ "u401", "u410", "u411" ]);
 
         assert.deepEqual(mergeResult, [ ]);
+    });
+
+    it('should correct sort in clockwise direction', function () {
+        assert.deepEqual(geohashContourUtils.sortClockwise([ "w9cx6wbuuyu", "w9cwfqk3f0m", "w9cx71g9s1b", "w9cwg7dkdrp"]),
+            ["w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"]);
+        
+        assert.deepEqual(geohashContourUtils.sortClockwise([ "w9cx6wbuuyu", "w9cwfqk3f0m", "w9cx71g9s1b", "w9cwg7dkdrp"], true),
+            ["w9cx6wbuuyu", "w9cwfqk3f0m", "w9cwg7dkdrp", "w9cx71g9s1b"]);
     });
 });

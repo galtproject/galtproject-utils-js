@@ -11,11 +11,77 @@ module.exports = class GeohashContour {
      * @param contour
      * @returns [lat, lon]
      */
-    static area(contour){
-        return geojsonArea.ring(contour.map((geohash) => {
+    static area(contour) {
+        return Math.abs(geojsonArea.ring(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             return [coors.lat, coors.lon];
-        }));
+        })));
+    }
+
+    /**
+     * Sort geohashes of contour in clockwise direction
+     * @param contour
+     * @param antiClockwise
+     * @returns {*}
+     */
+    static sortClockwise(contour, antiClockwise = false) {
+        if(!contour.length || contour.length === 1) {
+            return contour;
+        }
+        let points = contour.map((geohash) => {
+            const coors = GeohashExtra.decodeToLatLon(geohash);
+            return {x: coors.lat, y: coors.lon};
+        });
+
+        // Find min max to get center
+        // Sort from top to bottom
+        points.sort((a, b) => a.y - b.y);
+
+        // Get center y
+        const cy = (points[0].y + points[points.length - 1].y) / 2;
+
+        // Sort from right to left
+        points.sort((a, b) => b.x - a.x);
+
+        // Get center x
+        const cx = (points[0].x + points[points.length - 1].x) / 2;
+
+        // Center point
+        const center = {x: cx, y: cy};
+
+        // Pre calculate the angles as it will be slow in the sort
+        // As the points are sorted from right to left the first point
+        // is the rightmost
+
+        // Starting angle used to reference other angles
+        let startAng;
+        points.forEach(point => {
+            let ang = Math.atan2(point.y - center.y, point.x - center.x);
+            if (!startAng) {
+                startAng = ang
+            }
+            else {
+                if (ang < startAng) {  // ensure that all points are clockwise of the start point
+                    ang += Math.PI * 2;
+                }
+            }
+            point.angle = ang; // add the angle to the point
+        });
+        
+        // Sort clockwise;
+        points.sort((a, b) => a.angle - b.angle);
+        
+        if(antiClockwise) {
+            const ccwPoints = points.reverse();
+
+            // move the last point back to the start
+            ccwPoints.unshift(ccwPoints.pop());
+            points = ccwPoints;
+        }
+        
+        return points.map((point) => {
+            return GeohashExtra.encodeFromLatLng(point.x, point.y, contour[0].length);
+        })
     }
 
     /**
@@ -25,26 +91,123 @@ module.exports = class GeohashContour {
      * @param operation
      * @returns [geohash]
      */
-    static overlay(redContour, blueContour, operation){
+    static overlay(redContour, blueContour, operation) {
         const redPoints = [], redEdges = [];
         const bluePoints = [], blueEdges = [];
-        
-        redContour.map((geohash, index) => {
+
+        redContour.forEach((geohash, index) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             redPoints.push([coors.lat, coors.lon]);
             redEdges.push([index, (redContour.length - 1 === index) ? 0 : index + 1]);
         });
 
-        blueContour.map((geohash, index) => {
+        blueContour.forEach((geohash, index) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
             bluePoints.push([coors.lat, coors.lon]);
             blueEdges.push([index, (blueContour.length - 1 === index) ? 0 : index + 1]);
         });
-        
+
         const overlayResult = overlayPslg(redPoints, redEdges, bluePoints, blueEdges, operation);
-        return overlayResult.points.map((point) => {
+        const concatEdges = overlayResult.blue.concat(overlayResult.red);
+        
+        const sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        
+        return sortedPoints.map((point) => {
             return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
         });
+    }
+
+    /**
+     * Sort points array by edges array of overlay operation
+     * @param points
+     * @param edges
+     * @returns {Array}
+     */
+    static pointsSortByEdges(points, edges) {
+        if(!edges.length) {
+            return points;
+        }
+        
+        const edgesStack = edges.map(edge => edge);
+        
+        let sortedPoints = [];
+        
+        const firstEdge = edges[0];
+        
+        addPointByEdge(firstEdge);
+        
+        function addPointByEdge(addEdge, i = 0) {
+            if(addEdge[0] === firstEdge[0] && i > 0) {
+                return;
+            }
+            if(i > points.length) {
+                sortedPoints = points;
+                return;
+            }
+            sortedPoints.push(points[addEdge[0]]);
+            
+            let nextEdge;
+            const foundEdgeByBeginning = _.find(edgesStack, (edge) => edge[0] === addEdge[1]);
+            if(foundEdgeByBeginning) {
+                nextEdge = foundEdgeByBeginning;
+                edgesStack.splice(edgesStack.indexOf(foundEdgeByBeginning), 1);
+            } else {
+                const foundEdgeByEnd = _.find(edgesStack, (edge) => edge[1] === addEdge[1] && edge[0] !== addEdge[0]);
+                nextEdge = [foundEdgeByEnd[1], foundEdgeByEnd[0]];
+                edgesStack.splice(edgesStack.indexOf(foundEdgeByEnd), 1);
+            }
+            addPointByEdge(nextEdge, ++i);
+        }
+        
+        return sortedPoints;
+    }
+
+    /**
+     * Check - is split possible for two contours
+     * @param baseContour
+     * @param splitContour
+     * @returns {boolean}
+     */
+    static splitPossible(baseContour, splitContour) {
+        const intersects = GeohashContour.overlay(baseContour, splitContour, "and").length;
+        if(!intersects) {
+            return false;
+        }
+
+        const rest = GeohashContour.overlay(baseContour, splitContour, "sub").length;
+        if(!rest) {
+            return false;
+        }
+
+        const firstContour = splitContour;
+        const secondContour = baseContour;
+
+        const intersectsMoreThenTwoTimes = firstContour.some((firstContourGeohash, firstContourIndex) => {
+            const firstContourGeohash1 = firstContourGeohash;
+            const firstContourGeohash2 = firstContour[firstContourIndex + 1 < firstContour.length ? firstContourIndex + 1 : 0];
+            
+            const intersectsCount = secondContour.filter((secondContourGeohash, secondContourIndex) => {
+                if(secondContourIndex === 0) {
+                    return;
+                }
+                const secondContourGeohash1 = secondContourGeohash;
+                const secondContourGeohash2 = secondContour[secondContourIndex + 1 < secondContour.length ? secondContourIndex + 1 : 0];
+                
+                return GeohashContour.intersectsGeohashesLines(
+                    firstContourGeohash1,
+                    firstContourGeohash2,
+                    secondContourGeohash1,
+                    secondContourGeohash2
+                );
+            }).length;
+            return intersectsCount > 1;
+        });
+        
+        if(intersectsMoreThenTwoTimes) {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -54,26 +217,38 @@ module.exports = class GeohashContour {
      * @returns {base, split}
      */
     static splitContours(baseContour, splitContour) {
+        if(!GeohashContour.splitPossible(baseContour, splitContour)) {
+            return {
+                base: baseContour,
+                split: splitContour
+            };
+        }
         return {
             base: GeohashContour.overlay(baseContour, splitContour, "rsub"),
             split: GeohashContour.overlay(baseContour, splitContour, "and")
         };
     }
-    
-    static mergePossible(baseContour, mergeContour){
+
+    /**
+     * Check - is merge possible for two contours
+     * @param baseContour
+     * @param mergeContour
+     * @returns {boolean}
+     */
+    static mergePossible(baseContour, mergeContour) {
         let mergePossible = false;
         baseContour.some(geohash => {
             mergePossible = mergePossible || mergeContour.indexOf(geohash) !== -1;
             return mergePossible;
         });
-        
-        if(mergePossible) {
+
+        if (mergePossible) {
             return mergePossible;
         }
 
         return GeohashContour.overlay(baseContour, mergeContour, "and").length > 0;
     }
-    
+
     /**
      * Merge contours and returns result contour
      * @param baseContour
@@ -82,12 +257,12 @@ module.exports = class GeohashContour {
      * @returns [geohash]
      */
     static mergeContours(baseContour, mergeContour, filterByDuplicates = true) {
-        if(!GeohashContour.mergePossible(baseContour, mergeContour)) {
+        if (!GeohashContour.mergePossible(baseContour, mergeContour)) {
             return [];
         }
         const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or");
-        
-        if(filterByDuplicates) {
+
+        if (filterByDuplicates) {
             return resultContour.filter(geohash => {
                 return baseContour.indexOf(geohash) === -1 || mergeContour.indexOf(geohash) === -1;
             });
@@ -95,7 +270,7 @@ module.exports = class GeohashContour {
             return resultContour;
         }
     }
-    
+
     static bboxes(contour, precision) {
         let maxLat;
         let minLat;
@@ -230,6 +405,40 @@ module.exports = class GeohashContour {
 
         return inside;
     }
+    
+    static intersectsGeohashesLines(geohash1Line1, geohash2Line1, geohash1Line2, geohash2Line2){
+        return GeohashContour.intersectsLines(
+            GeohashExtra.decodeToLatLon(geohash1Line1, true),
+            GeohashExtra.decodeToLatLon(geohash2Line1, true),
+            GeohashExtra.decodeToLatLon(geohash1Line2, true),
+            GeohashExtra.decodeToLatLon(geohash2Line2, true)
+        );
+    }
+
+    // https://stackoverflow.com/a/24392281/6053486
+    static intersectsLines(point1Line1, point2Line1, point1Line2, point2Line2) {
+        const a = point1Line1[0],
+            b = point1Line1[1];
+        
+        const c = point2Line1[0],
+            d = point2Line1[1];
+
+        const p = point1Line2[0],
+            q = point1Line2[1];
+
+        const r = point2Line2[0],
+            s = point2Line2[1];
+        
+        let det, gamma, lambda;
+        det = (c - a) * (s - q) - (r - p) * (d - b);
+        if (det === 0) {
+            return false;
+        } else {
+            lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+            gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+            return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+        }
+    };
 
     /**
      * Filter geohashes list by contains in contour
