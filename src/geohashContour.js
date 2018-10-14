@@ -182,7 +182,7 @@ module.exports = class GeohashContour {
         const firstContour = splitContour;
         const secondContour = baseContour;
 
-        const intersectsMoreThenTwoTimes = firstContour.some((firstContourGeohash, firstContourIndex) => {
+        const intersectsMoreThenTwoTimes = firstContour.filter((firstContourGeohash, firstContourIndex) => {
             const firstContourGeohash1 = firstContourGeohash;
             const firstContourGeohash2 = firstContour[firstContourIndex + 1 < firstContour.length ? firstContourIndex + 1 : 0];
             
@@ -201,9 +201,9 @@ module.exports = class GeohashContour {
                 );
             }).length;
             return intersectsCount > 1;
-        });
+        }).length;
         
-        if(intersectsMoreThenTwoTimes) {
+        if(intersectsMoreThenTwoTimes > 1) {
             return false;
         }
         
