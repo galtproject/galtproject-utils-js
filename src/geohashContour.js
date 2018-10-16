@@ -108,13 +108,24 @@ module.exports = class GeohashContour {
         });
 
         const overlayResult = overlayPslg(redPoints, redEdges, bluePoints, blueEdges, operation);
-        const concatEdges = overlayResult.blue.concat(overlayResult.red);
-        
-        const sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
-        
-        return sortedPoints.map((point) => {
+        const contour = overlayResult.points.map((point) => {
             return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
         });
+
+        const concatEdges = overlayResult.blue.concat(overlayResult.red);
+
+        const sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        
+        const sortedContour = sortedPoints.map((point) => {
+            return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
+        });
+        return {
+            red: overlayResult.red,
+            blue: overlayResult.blue,
+            points: overlayResult.points,
+            contour: contour,
+            sortedContour: sortedContour
+        };
     }
 
     /**
@@ -169,44 +180,16 @@ module.exports = class GeohashContour {
      * @returns {boolean}
      */
     static splitPossible(baseContour, splitContour) {
-        const intersects = GeohashContour.overlay(baseContour, splitContour, "and").length;
-        if(!intersects) {
+        const andResult = GeohashContour.overlay(baseContour, splitContour, "and");
+        if(!andResult.points.length || andResult.contour.length > andResult.sortedContour.length) {
             return false;
         }
 
-        const rest = GeohashContour.overlay(baseContour, splitContour, "sub").length;
-        if(!rest) {
+        const subResult = GeohashContour.overlay(baseContour, splitContour, "sub");
+        if(!subResult.points.length || subResult.contour.length > subResult.sortedContour.length) {
             return false;
         }
 
-        const firstContour = splitContour;
-        const secondContour = baseContour;
-
-        const intersectsMoreThenTwoTimes = firstContour.some((firstContourGeohash, firstContourIndex) => {
-            const firstContourGeohash1 = firstContourGeohash;
-            const firstContourGeohash2 = firstContour[firstContourIndex + 1 < firstContour.length ? firstContourIndex + 1 : 0];
-            
-            const intersectsCount = secondContour.filter((secondContourGeohash, secondContourIndex) => {
-                if(secondContourIndex === 0) {
-                    return;
-                }
-                const secondContourGeohash1 = secondContourGeohash;
-                const secondContourGeohash2 = secondContour[secondContourIndex + 1 < secondContour.length ? secondContourIndex + 1 : 0];
-                
-                return GeohashContour.intersectsGeohashesLines(
-                    firstContourGeohash1,
-                    firstContourGeohash2,
-                    secondContourGeohash1,
-                    secondContourGeohash2
-                );
-            }).length;
-            return intersectsCount > 1;
-        });
-        
-        if(intersectsMoreThenTwoTimes) {
-            return false;
-        }
-        
         return true;
     }
 
@@ -224,8 +207,8 @@ module.exports = class GeohashContour {
             };
         }
         return {
-            base: GeohashContour.overlay(baseContour, splitContour, "rsub"),
-            split: GeohashContour.overlay(baseContour, splitContour, "and")
+            base: GeohashContour.overlay(baseContour, splitContour, "rsub").sortedContour,
+            split: GeohashContour.overlay(baseContour, splitContour, "and").sortedContour
         };
     }
 
@@ -246,7 +229,7 @@ module.exports = class GeohashContour {
             return mergePossible;
         }
 
-        return GeohashContour.overlay(baseContour, mergeContour, "and").length > 0;
+        return GeohashContour.overlay(baseContour, mergeContour, "and").points.length > 0;
     }
 
     /**
@@ -260,7 +243,7 @@ module.exports = class GeohashContour {
         if (!GeohashContour.mergePossible(baseContour, mergeContour)) {
             return [];
         }
-        const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or");
+        const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or").sortedContour;
 
         if (filterByDuplicates) {
             return resultContour.filter(geohash => {

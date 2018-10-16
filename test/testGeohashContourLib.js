@@ -45,10 +45,16 @@ describe('geohashContour utils', () => {
          |_| |_|
            |_|
          */
-        console.log('intersectContoursSplitPossible START')
-        const intersectContoursSplitPossible = geohashContourUtils.splitPossible(["w24q8w5b8bx", "w24q8tzncuz", "w24q8wyzcj3", "w24q8wgu6ux"], ["w24q8wdkjb6", "w24q8wxm7b7", "w24q8y2jcbt", "w24q8w4w7bd"]);
+        let intersectContoursSplitPossible = geohashContourUtils.splitPossible(["w24q8w5b8bx", "w24q8tzncuz", "w24q8wyzcj3", "w24q8wgu6ux"], ["w24q8wdkjb6", "w24q8wxm7b7", "w24q8y2jcbt", "w24q8w4w7bd"]);
         assert.equal(intersectContoursSplitPossible, false);
-        console.log('intersectContoursSplitPossible END')
+
+        /*   .
+          __/_\__
+         |_/___\_|
+          /_____\
+         */ 
+        intersectContoursSplitPossible = geohashContourUtils.splitPossible(["w24qgqd27yx", "w24qgusp7zp", "w24qg9s2rzz"], ["w24qgqgd4y9", "w24qgqstryd", "w24qgm6hwyc"]);
+        assert.equal(intersectContoursSplitPossible, false);
         
         let mergeResult = geohashContourUtils.mergeContours([ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ], [ 'w9cx6wbuuyu', 'w9cx63zs884', 'w9cx71gk90n' ]);
 
