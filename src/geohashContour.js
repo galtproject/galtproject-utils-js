@@ -300,7 +300,7 @@ module.exports = class GeohashContour {
         const parentsForMerge = [];
 
         allGeohashes.forEach((geohash, index) => {
-            if (GeohashContour.isGeohashInside(geohash, polygon)) {
+            if (GeohashContour.isGeohashInside(geohash, polygon, contour)) {
 
                 geohashesInside.push(geohash);
 
@@ -348,7 +348,11 @@ module.exports = class GeohashContour {
         return geohashesInside;
     }
 
-    static isGeohashInside(geohash, latLngPolygon) {
+    static isGeohashInside(geohash, latLngPolygon, strict = true) {
+        if(!strict) {
+            const latLon = GeohashExtra.decodeToLatLon(geohash);
+            return GeohashContour.isInside([latLon.lat, latLon.lon], latLngPolygon);
+        }
         const neChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'ne'), 'ne');
         const seChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'se'), 'se');
         const nwChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'nw'), 'nw');
@@ -363,6 +367,23 @@ module.exports = class GeohashContour {
             && GeohashContour.isInside([seCoor.lat, seCoor.lon], latLngPolygon)
             && GeohashContour.isInside([nwCoor.lat, nwCoor.lon], latLngPolygon)
             && GeohashContour.isInside([swCoor.lat, swCoor.lon], latLngPolygon);
+    }
+
+
+    static isGeohashInsideContour(geohash, contour, strict = true) {
+        const polygon = contour.map((geohash) => {
+            const coordinates = GeohashExtra.decodeToLatLon(geohash);
+            return [coordinates.lat, coordinates.lon];
+        });
+
+        return GeohashContour.isGeohashInside(geohash, polygon, strict);
+    }
+
+    static middleGeohashOfLine(geohash1, geohash2) {
+        const point1 = GeohashExtra.decodeToLatLon(geohash1);
+        const point2 = GeohashExtra.decodeToLatLon(geohash2);
+
+        return GeohashExtra.encodeFromLatLng((point1.lat + point2.lat) / 2, (point1.lon + point2.lon) / 2, geohash1.length);
     }
 
     // https://github.com/substack/point-in-polygon
