@@ -58,7 +58,7 @@ describe('geohashContour utils', () => {
         
         let mergeResult = geohashContourUtils.mergeContours([ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ], [ 'w9cx6wbuuyu', 'w9cx63zs884', 'w9cx71gk90n' ]);
 
-        assert.deepEqual(mergeResult, [ 'w9cx6wbuuyu', 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m' ]);
+        assert.deepEqual(mergeResult, [ 'w9cx6wbuuyu', 'w9cx71gk90n', 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884'  ]);
 
         mergeResult = geohashContourUtils.mergeContours([ 'w9cx71g9s1b', 'w9cwg7dkdrp', 'w9cwfqk3f0m', 'w9cx63zs884', 'w9cx71gk90n' ], [ "u401", "u410", "u411" ]);
 
