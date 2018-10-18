@@ -1,6 +1,6 @@
 {
   "name": "@galtproject/utils",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Toolbox to interact with Galt Project",
   "main": "index.js",
   "scripts": {
