@@ -236,18 +236,19 @@ module.exports = class GeohashContour {
      * Merge contours and returns result contour
      * @param baseContour
      * @param mergeContour
-     * @param filterByDuplicates
+     * @param filterByInsideContourGeohashes
      * @returns [geohash]
      */
-    static mergeContours(baseContour, mergeContour, filterByDuplicates = true) {
+    static mergeContours(baseContour, mergeContour, filterByInsideContourGeohashes = true) {
         if (!GeohashContour.mergePossible(baseContour, mergeContour)) {
             return [];
         }
         const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or").sortedContour;
 
-        if (filterByDuplicates) {
+        if (filterByInsideContourGeohashes) {
             return resultContour.filter(geohash => {
-                return baseContour.indexOf(geohash) === -1 || mergeContour.indexOf(geohash) === -1;
+                // Check and delete geohashes, which fully inside result contour(not on edge)
+                return !GeohashContour.isGeohashInsideContour(geohash, resultContour, true);
             });
         } else {
             return resultContour;
