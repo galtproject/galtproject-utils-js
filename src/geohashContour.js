@@ -127,6 +127,10 @@ module.exports = class GeohashContour {
             sortedContour: sortedContour
         };
     }
+    
+    static intersects(contour1, contour2) {
+        return GeohashContour.overlay(contour1, contour2, "and").points.length > 0
+    }
 
     /**
      * Sort points array by edges array of overlay operation
@@ -254,7 +258,7 @@ module.exports = class GeohashContour {
             return mergePossible;
         }
 
-        return GeohashContour.overlay(baseContour, mergeContour, "and").points.length > 0;
+        return GeohashContour.intersects(baseContour, mergeContour);
     }
 
     /**
