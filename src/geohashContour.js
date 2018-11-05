@@ -127,6 +127,10 @@ module.exports = class GeohashContour {
             sortedContour: sortedContour
         };
     }
+    
+    static intersects(contour1, contour2) {
+        return GeohashContour.overlay(contour1, contour2, "and").points.length > 0
+    }
 
     /**
      * Sort points array by edges array of overlay operation
@@ -197,19 +201,44 @@ module.exports = class GeohashContour {
      * Split contours and returns result contours
      * @param baseContour
      * @param splitContour
+     * @param checkAndReplaceIntersectionGeohashes
      * @returns {base, split}
      */
-    static splitContours(baseContour, splitContour) {
+    static splitContours(baseContour, splitContour, checkAndReplaceIntersectionGeohashes = false) {
         if(!GeohashContour.splitPossible(baseContour, splitContour)) {
             return {
                 base: baseContour,
                 split: splitContour
             };
         }
-        return {
+        const result = {
             base: GeohashContour.overlay(baseContour, splitContour, "rsub").sortedContour,
             split: GeohashContour.overlay(baseContour, splitContour, "and").sortedContour
         };
+
+        if(checkAndReplaceIntersectionGeohashes) {
+            // Replace geohash by neighbour if geohash not inside baseContour
+            const intersectionGeohashes = _.intersection(result.base, result.split);
+
+            intersectionGeohashes.forEach(geohash => {
+                const geohashInside = GeohashContour.isGeohashInsideContour(geohash, baseContour, false);
+                if(!geohashInside) {
+                    ['n', 's', 'e', 'w'].some((corner) => {
+                        const cornerNeighbour = Geohash.neighbourByDirection(geohash, corner);
+                        const cornerNeighbourInside = GeohashContour.isGeohashInsideContour(cornerNeighbour, baseContour, false);
+                        if(cornerNeighbourInside) {
+                            const baseIndex = _.findIndex(result.base, function(g) { return g == geohash; });
+                            result.base[baseIndex] = cornerNeighbour;
+                            const splitIndex = _.findIndex(result.split, function(g) { return g == geohash; });
+                            result.split[splitIndex] = cornerNeighbour;
+                        }
+                        return cornerNeighbourInside;
+                    })
+                }
+            });
+        }
+
+        return result;
     }
 
     /**
@@ -229,7 +258,7 @@ module.exports = class GeohashContour {
             return mergePossible;
         }
 
-        return GeohashContour.overlay(baseContour, mergeContour, "and").points.length > 0;
+        return GeohashContour.intersects(baseContour, mergeContour);
     }
 
     /**
