@@ -114,7 +114,12 @@ module.exports = class GeohashContour {
 
         const concatEdges = overlayResult.blue.concat(overlayResult.red);
 
-        const sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        let sortedPoints;
+        try {
+            sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        } catch(e) {
+            sortedPoints = overlayResult.points;
+        }
         
         const sortedContour = sortedPoints.map((point) => {
             return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
