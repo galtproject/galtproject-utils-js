@@ -114,7 +114,12 @@ module.exports = class GeohashContour {
 
         const concatEdges = overlayResult.blue.concat(overlayResult.red);
 
-        const sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        let sortedPoints;
+        try {
+            sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
+        } catch(e) {
+            sortedPoints = overlayResult.points;
+        }
         
         const sortedContour = sortedPoints.map((point) => {
             return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
@@ -168,6 +173,7 @@ module.exports = class GeohashContour {
                 edgesStack.splice(edgesStack.indexOf(foundEdgeByBeginning), 1);
             } else {
                 const foundEdgeByEnd = _.find(edgesStack, (edge) => edge[1] === addEdge[1] && edge[0] !== addEdge[0]);
+                //TODO: solve foundEdgeByEnd undefined problem
                 nextEdge = [foundEdgeByEnd[1], foundEdgeByEnd[0]];
                 edgesStack.splice(edgesStack.indexOf(foundEdgeByEnd), 1);
             }
