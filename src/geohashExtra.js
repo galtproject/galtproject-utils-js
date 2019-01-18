@@ -5,7 +5,7 @@ const ngeohash = require('ngeohash');
 const _ = require('lodash');
 const Geohash = require('./geohash');
 
-module.exports = class GeohashContour {
+module.exports = class GeohashExtra {
     static decodeToLatLon(geohash, arrayMode = false) {
         const {latitude, longitude} = ngeohash.decode(geohash);
         
