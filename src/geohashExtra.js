@@ -93,4 +93,28 @@ module.exports = class GeohashExtra {
 
         return preparedGeohashes;
     }
+
+    static autoBboxes(leftBoundGeohash, rightBoundGeohash, preferredGeohashes = 10, startPrecision = 1) {
+        let leftBoundPoint = this.decodeToLatLon(leftBoundGeohash);
+        let rightBoundPoint = this.decodeToLatLon(rightBoundGeohash);
+
+        let minLat = Math.min(leftBoundPoint.lat, rightBoundPoint.lat);
+        let minLon = Math.min(leftBoundPoint.lon, rightBoundPoint.lon);
+
+        let maxLat = Math.max(leftBoundPoint.lat, rightBoundPoint.lat);
+        let maxLon = Math.max(leftBoundPoint.lon, rightBoundPoint.lon);
+
+        let resultGeohashes;
+        let precision = startPrecision;
+
+        do {
+            resultGeohashes = ngeohash.bboxes(minLat, minLon, maxLat, maxLon, precision);
+            precision++;
+            if(precision > 13) {
+                break;
+            }
+        } while(resultGeohashes.length < preferredGeohashes)
+
+        return resultGeohashes;
+    }
 };
