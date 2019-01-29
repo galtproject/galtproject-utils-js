@@ -113,7 +113,41 @@ module.exports = class GeohashExtra {
             if(precision > 13) {
                 break;
             }
-        } while(resultGeohashes.length < preferredGeohashes)
+        } while(resultGeohashes.length < preferredGeohashes);
+
+        const parentsToChildren = {};
+        const parentsForMerge = [];
+
+        resultGeohashes.forEach((geohash) => {
+            const parent = Geohash.getParent(geohash);
+            if (!parentsToChildren[parent]) {
+                parentsToChildren[parent] = [];
+            }
+            parentsToChildren[parent].push(geohash);
+
+            if (parentsToChildren[parent].length === 32) {
+                parentsForMerge.push(parent);
+            }
+        });
+
+        for (let i = 0; i < parentsForMerge.length; i++) {
+            const geohashParent = parentsForMerge[i];
+
+            parentsToChildren[geohashParent].forEach((geohash) => {
+                resultGeohashes.splice(resultGeohashes.indexOf(geohash), 1);
+            });
+            resultGeohashes.push(geohashParent);
+
+            const parentOfParent = Geohash.getParent(geohashParent);
+            if (!parentsToChildren[parentOfParent]) {
+                parentsToChildren[parentOfParent] = [];
+            }
+            parentsToChildren[parentOfParent].push(geohashParent);
+
+            if (parentsToChildren[parentOfParent].length === 32) {
+                parentsForMerge.push(parentOfParent);
+            }
+        }
 
         return resultGeohashes;
     }
