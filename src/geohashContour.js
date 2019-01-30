@@ -2,6 +2,8 @@ const ngeohash = require('ngeohash');
 const _ = require('lodash');
 const Geohash = require('./geohash');
 const GeohashExtra = require('./geohashExtra');
+const Utm = require('./utm');
+const LatLon = require('./latLon');
 const geojsonArea = require('@mapbox/geojson-area');
 const overlayPslg = require('overlay-pslg');
 
@@ -12,9 +14,9 @@ module.exports = class GeohashContour {
      * @returns [lat, lon]
      */
     static area(contour) {
-        return Math.abs(geojsonArea.ring(contour.map((geohash) => {
+        return Math.abs(Utm.area(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
-            return [coors.lat, coors.lon];
+            return LatLon.toUtm(coors.lat, coors.lon);
         })));
     }
 
