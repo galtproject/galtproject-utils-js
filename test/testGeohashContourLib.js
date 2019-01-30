@@ -72,4 +72,8 @@ describe('geohashContour utils', () => {
         assert.deepEqual(geohashContourUtils.sortClockwise([ "w9cx6wbuuyu", "w9cwfqk3f0m", "w9cx71g9s1b", "w9cwg7dkdrp"], true),
             ["w9cx6wbuuyu", "w9cwfqk3f0m", "w9cwg7dkdrp", "w9cx71g9s1b"]);
     });
+
+    it('should correct sort in clockwise direction', function () {
+        assert.deepEqual(geohashContourUtils.area([ "w9cx6wbuuyu", "w9cx71g9s1b", "w9cwg7dkdrp", "w9cwfqk3f0m"]), 33780459.29545421);
+    });
 });
