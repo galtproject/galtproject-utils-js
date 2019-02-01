@@ -5,7 +5,7 @@ const GeohashExtra = require('./geohashExtra');
 const Utm = require('./utm');
 const LatLon = require('./latLon');
 const geojsonArea = require('@mapbox/geojson-area');
-const overlayPslg = require('overlay-pslg');
+const martinezRueda = require('martinez-polygon-clipping');
 
 module.exports = class GeohashContour {
     /**
@@ -94,49 +94,34 @@ module.exports = class GeohashContour {
      * @returns [geohash]
      */
     static overlay(redContour, blueContour, operation) {
-        const redPoints = [], redEdges = [];
-        const bluePoints = [], blueEdges = [];
-
-        redContour.forEach((geohash, index) => {
-            const coors = GeohashExtra.decodeToLatLon(geohash);
-            redPoints.push([coors.lat, coors.lon]);
-            redEdges.push([index, (redContour.length - 1 === index) ? 0 : index + 1]);
-        });
-
-        blueContour.forEach((geohash, index) => {
-            const coors = GeohashExtra.decodeToLatLon(geohash);
-            bluePoints.push([coors.lat, coors.lon]);
-            blueEdges.push([index, (blueContour.length - 1 === index) ? 0 : index + 1]);
-        });
-
-        const overlayResult = overlayPslg(redPoints, redEdges, bluePoints, blueEdges, operation);
-        const contour = overlayResult.points.map((point) => {
-            return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
-        });
-
-        const concatEdges = overlayResult.blue.concat(overlayResult.red);
-
-        let sortedPoints;
-        try {
-            sortedPoints = GeohashContour.pointsSortByEdges(overlayResult.points, concatEdges);
-        } catch(e) {
-            sortedPoints = overlayResult.points;
-        }
+        const redPoints = redContour.map((geohash) => GeohashExtra.decodeToLatLon(geohash, true));
+        redPoints.push(redPoints[0]);
         
-        const sortedContour = sortedPoints.map((point) => {
-            return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
-        });
+        const bluePoints = blueContour.map((geohash) => GeohashExtra.decodeToLatLon(geohash, true));
+        bluePoints.push(bluePoints[0]);
+
+        const overlayResult = martinezRueda[operation]([ redPoints ], [ bluePoints ]);
+        
+        let contour = [];
+        if(overlayResult && overlayResult[0] && overlayResult[0][0] && overlayResult[0][0].length) {
+            contour = overlayResult[0][0].map((point) => {
+                return GeohashExtra.encodeFromLatLng(point[0], point[1], redContour[0].length);
+            });
+        }
+
+        contour.splice(-1, 1);
+        // contour.splice(0, 1);
+
         return {
-            red: overlayResult.red,
-            blue: overlayResult.blue,
-            points: overlayResult.points,
+            result: overlayResult,
             contour: contour,
-            sortedContour: sortedContour
+            sortedContour: contour
         };
     }
     
     static intersects(contour1, contour2) {
-        return GeohashContour.overlay(contour1, contour2, "and").points.length > 0
+        const overlayResult = GeohashContour.overlay(contour1, contour2, "intersection").result;
+        return overlayResult && overlayResult[0] && overlayResult[0].length === 1;
     }
 
     /**
@@ -192,13 +177,13 @@ module.exports = class GeohashContour {
      * @returns {boolean}
      */
     static splitPossible(baseContour, splitContour) {
-        const andResult = GeohashContour.overlay(baseContour, splitContour, "and");
-        if(!andResult.points.length || andResult.contour.length > andResult.sortedContour.length) {
+        const andResult = GeohashContour.overlay(baseContour, splitContour, "diff").result;
+        if(!andResult || !andResult[0] || !andResult[0].length || andResult.length > 1) {
             return false;
         }
 
-        const subResult = GeohashContour.overlay(baseContour, splitContour, "sub");
-        if(!subResult.points.length || subResult.contour.length > subResult.sortedContour.length) {
+        const subResult = GeohashContour.overlay(baseContour, splitContour, "intersection").result;
+        if(!subResult || !subResult[0] || !subResult[0].length) {
             return false;
         }
 
@@ -220,8 +205,8 @@ module.exports = class GeohashContour {
             };
         }
         const result = {
-            base: GeohashContour.overlay(baseContour, splitContour, "rsub").sortedContour,
-            split: GeohashContour.overlay(baseContour, splitContour, "and").sortedContour
+            base: GeohashContour.overlay(baseContour, splitContour, "diff").sortedContour,
+            split: GeohashContour.overlay(baseContour, splitContour, "intersection").sortedContour
         };
 
         if(checkAndReplaceIntersectionGeohashes) {
@@ -280,7 +265,7 @@ module.exports = class GeohashContour {
         if (!GeohashContour.mergePossible(baseContour, mergeContour)) {
             return [];
         }
-        const resultContour = GeohashContour.overlay(baseContour, mergeContour, "or").sortedContour;
+        const resultContour = GeohashContour.overlay(baseContour, mergeContour, "union").sortedContour;
 
         if (filterByInsideContourGeohashes) {
             return resultContour.filter(geohash => {
