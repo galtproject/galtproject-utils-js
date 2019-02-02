@@ -11,34 +11,36 @@ module.exports = class LatLon {
 
         // ---- handle Norway/Svalbard exceptions
         // grid zones are 8° tall; 0°N is offset 10 into latitude bands array
-        const latBand = Math.floor(_lat / 8 + 10);
+        const latBandNumber = Math.floor(_lat / 8 + 10);
+        const mgrsLatBands = 'CDEFGHJKLMNPQRSTUVWXX'; // X is repeated for 80-84°N
+        const latBand = mgrsLatBands.charAt(latBandNumber);
         // adjust zone & central meridian for Norway
-        if (zone === 31 && latBand === 17 && _lon >= 3) {
+        if (zone === 31 && latBandNumber === 17 && _lon >= 3) {
             zone++;
             λ0 += (6).toRadians();
         }
         // adjust zone & central meridian for Svalbard
-        if (zone === 32 && (latBand === 19 || latBand === 20) && _lon < 9) {
+        if (zone === 32 && (latBandNumber === 19 || latBandNumber === 20) && _lon < 9) {
             zone--;
             λ0 -= (6).toRadians();
         }
-        if (zone === 32 && (latBand === 19 || latBand === 20) && _lon >= 9) {
+        if (zone === 32 && (latBandNumber === 19 || latBandNumber === 20) && _lon >= 9) {
             zone++;
             λ0 += (6).toRadians();
         }
-        if (zone === 34 && (latBand === 19 || latBand === 20) && _lon < 21) {
+        if (zone === 34 && (latBandNumber === 19 || latBandNumber === 20) && _lon < 21) {
             zone--;
             λ0 -= (6).toRadians();
         }
-        if (zone === 34 && (latBand === 19 || latBand === 20) && _lon >= 21) {
+        if (zone === 34 && (latBandNumber === 19 || latBandNumber === 20) && _lon >= 21) {
             zone++;
             λ0 += (6).toRadians();
         }
-        if (zone === 36 && (latBand === 19 || latBand === 20) && _lon < 33) {
+        if (zone === 36 && (latBandNumber === 19 || latBandNumber === 20) && _lon < 33) {
             zone--;
             λ0 -= (6).toRadians();
         }
-        if (zone === 36 && (latBand === 19 || latBand === 20) && _lon >= 33) {
+        if (zone === 36 && (latBandNumber === 19 || latBandNumber === 20) && _lon >= 33) {
             zone++;
             λ0 += (6).toRadians();
         }
@@ -135,7 +137,9 @@ module.exports = class LatLon {
             x,
             y,
             convergence,
-            scale
+            scale,
+            latBand,
+            latBandNumber
         };
     }
 };

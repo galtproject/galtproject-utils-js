@@ -77,22 +77,21 @@ describe('geohashContour utils', () => {
             'w24qfkfeqxp7',
             'w24qf7uc60s8',
             'w24qf6s32p85' 
+        ], false);
+        
+        assert.deepEqual(mergeResult, [ 
+            "w24qf6s32p85",
+            "w24r407j3nm8",
+            "w24r40ptz160",
+            "w24qfr2eqww0",
+            "w24r4241fndj",
+            "w24qfrydmn3m",
+            "w24qfqqj8t5g",
+            "w24qfq6pqydp",
+            "w24qfmt8e75u",
+            "w24qfktnrmy4",
+            "w24qf7uc60s8" 
         ]);
-
-        // TODO: should work
-        // assert.deepEqual(mergeResult, [ 
-        //     "w24qf6s32p85",
-        //     "w24r407j3nm8",
-        //     "w24r40ptz160",
-        //     "w24qfr2eqww0",
-        //     "w24r4241fndj",
-        //     "w24qfrydmn3m",
-        //     "w24qfqqj8t5g",
-        //     "w24qfq6pqydp",
-        //     "w24qfmt8e75u",
-        //     "w24qfktnrmy4",
-        //     "w24qf7uc60s8" 
-        // ]);
     });
 
     it('should correct sort in clockwise direction', function () {
