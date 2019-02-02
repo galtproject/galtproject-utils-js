@@ -261,7 +261,7 @@ module.exports = class GeohashContour {
      * @param filterByInsideContourGeohashes
      * @returns [geohash]
      */
-    static mergeContours(baseContour, mergeContour, filterByInsideContourGeohashes = true) {
+    static mergeContours(baseContour, mergeContour, filterByInsideContourGeohashes = false) {
         if (!GeohashContour.mergePossible(baseContour, mergeContour)) {
             return [];
         }
