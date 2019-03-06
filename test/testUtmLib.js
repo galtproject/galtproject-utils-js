@@ -17,4 +17,17 @@ describe('utm utils', () => {
 
         assert.equal(utmUtils.area(utmContor), -6841437.324010707);
     });
+    
+    it('should correctly uncompress', function() {
+        const result = utmUtils.uncompress([443413.9761,136017.8858,10001048000.9997]);
+        assert.deepEqual(result, { 
+            x: 443413.9761,
+            y: 136017.8858,
+            h: 'N',
+            latBandNumber: 10,
+            latBand: 'N',
+            zone: 48,
+            scale: 0.9997005462646484 
+        })
+    })
 });

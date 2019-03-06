@@ -21,16 +21,17 @@ module.exports = class LatLon {
         let x = compressedUtm[0];
         let y = compressedUtm[1];
 
-        let latBandNumber = compressedUtm[2] / (10 ** 9);
+        let latBandNumber = Math.round(compressedUtm[2] / (10 ** 9));
         let latBand = mgrsLatBands[latBandNumber];
-        let isNorth = compressedUtm[2] / (10 ** 6) - latBand * 10 ** 3;
-        let zone = compressedUtm[2] / ( 10 ** 3) - isNorth * 10 ** 3 - latBand * 10 ** 6;
-        let scale = compressedUtm[2] - (zone * 10 ** 3) - (isNorth * 10 ** 6) - (latBand * 10 ** 9);
+        let isNorth = Math.round(compressedUtm[2] / (10 ** 6) - latBandNumber * 10 ** 3);
+        let zone = Math.round(compressedUtm[2] / (10 ** 3) - isNorth * 10 ** 3 - latBandNumber * 10 ** 6);
+        let scale = compressedUtm[2] - (zone * 10 ** 3) - (isNorth * 10 ** 6) - (latBandNumber * 10 ** 9);
         return {
             x,
             y,
+            h: isNorth ? 'N' : 'S',
+            latBandNumber,
             latBand,
-            isNorth,
             zone,
             scale
         }
