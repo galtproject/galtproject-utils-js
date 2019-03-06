@@ -20,14 +20,12 @@ describe('utm utils', () => {
     
     it('should correctly uncompress', function() {
         const result = utmUtils.uncompress([443413.9761,136017.8858,10001048000.9997]);
-        assert.deepEqual(result, { 
-            x: 443413.9761,
-            y: 136017.8858,
-            h: 'N',
-            latBandNumber: 10,
-            latBand: 'N',
-            zone: 48,
-            scale: 0.9997005462646484 
-        })
+        assert.equal(result.x, 443413.9761);
+        assert.equal(result.y, 136017.8858);
+        assert.equal(result.h, 'N');
+        assert.equal(result.latBandNumber, 10);
+        assert.equal(result.latBand, 'N');
+        assert.equal(result.zone, 48);
+        assert.equal(result.scale - 0.9997 < 0.00001, true);
     })
 });
