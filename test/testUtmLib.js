@@ -27,5 +27,18 @@ describe('utm utils', () => {
         assert.equal(result.latBand, 'N');
         assert.equal(result.zone, 48);
         assert.equal(result.scale - 0.9997 < 0.00001, true);
+    });
+
+    it('should correctly convert toString', function() {
+        const result = utmUtils.toString({
+            x: 443413.9761,
+            y: 136017.8858,
+            h: 'N',
+            latBandNumber: 10,
+            latBand: 'N',
+            zone: 48,
+            scale: 0.9997005462646484
+        });
+        assert.equal(result, 'N48 443413.9761E 136017.8858N');
     })
 });

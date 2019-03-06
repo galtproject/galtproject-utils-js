@@ -1,3 +1,5 @@
+const common = require('./common');
+
 module.exports = class LatLon {
     static area(polygon) {
         let area = 0; // Accumulates area in the loop	
@@ -35,5 +37,9 @@ module.exports = class LatLon {
             zone,
             scale
         }
+    }
+
+    static toString(utm) {
+        return `${utm.latBand}${utm.zone} ${common.roundToDecimal(utm.x, 6)}E ${common.roundToDecimal(utm.y, 6)}N`;
     }
 };
