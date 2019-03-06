@@ -185,6 +185,10 @@ function bytes32ToIpfsHash(bytes32) {
     return bs58.encode(bytes);
 }
 
+function roundToDecimal(number, decimal = 4) {
+    return Math.ceil(number * Math.pow(10, decimal)) / Math.pow(10, decimal);
+}
+
 module.exports = {
     geohashToNumber,
     numberToGeohash,
@@ -201,5 +205,6 @@ module.exports = {
     ipfsHashToBytes32,
     bytes32ToIpfsHash,
     isPack,
-    isGeohash
+    isGeohash,
+    roundToDecimal
 };
