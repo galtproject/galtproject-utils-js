@@ -14,4 +14,25 @@ module.exports = class LatLon {
 
         return area / 2;
     }
+    
+    static uncompress(compressedUtm) {
+        const mgrsLatBands = 'CDEFGHJKLMNPQRSTUVWXX';
+        
+        let x = compressedUtm[0];
+        let y = compressedUtm[1];
+
+        let latBandNumber = compressedUtm[2] / (10 ** 9);
+        let latBand = mgrsLatBands[latBandNumber];
+        let isNorth = compressedUtm[2] / (10 ** 6) - latBand * 10 ** 3;
+        let zone = compressedUtm[2] / ( 10 ** 3) - isNorth * 10 ** 3 - latBand * 10 ** 6;
+        let scale = compressedUtm[2] - (zone * 10 ** 3) - (isNorth * 10 ** 6) - (latBand * 10 ** 9);
+        return {
+            x,
+            y,
+            latBand,
+            isNorth,
+            zone,
+            scale
+        }
+    }
 };
