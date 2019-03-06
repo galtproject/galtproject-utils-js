@@ -1,6 +1,6 @@
 const common = require('./common');
 
-module.exports = class LatLon {
+module.exports = class Utm {
     static area(polygon) {
         let area = 0; // Accumulates area in the loop	
         let j = polygon.length - 1; // The last vertex is the 'previous' one to the first	
