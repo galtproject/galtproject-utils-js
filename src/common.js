@@ -59,7 +59,7 @@ function geohashToNumber(input) {
  * @returns {string} geohash
  */
 function numberToGeohash(input) {
-    const num = new BN(input);
+    const num = new BN(input.toString(10));
     if (num.gt(limit)) {
         throw new Error("Geohash number is greater than limit");
     }
@@ -120,7 +120,7 @@ function tokenIdHexToGeohash(tokenIdHex) {
 }
 
 function tokenIdToHex(tokenId) {
-    const geohash16 = (new BN(tokenId)).toString(16);
+    const geohash16 = (new BN(tokenId.toString(10))).toString(16);
     let hex;
     if(geohash16.length === 64) {
         hex = geohash16;
