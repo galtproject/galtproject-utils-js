@@ -1,4 +1,4 @@
-const latLonUtils = require('../src/latLon');
+const utm = require('../src/utm');
 const assert = require('assert');
 
 describe('latLon utils', () => {
@@ -20,7 +20,7 @@ describe('latLon utils', () => {
         ];
 
         latLonToCheck.forEach((latLon, index) => {
-            const resultUtm = latLonUtils.toUtm(latLon[0], latLon[1]);
+            const resultUtm = utm.fromLatLon(latLon[0], latLon[1]);
 
             assert.equal(shouldBeUtmByIndex[index].zone, resultUtm.zone);
             assert.equal(shouldBeUtmByIndex[index].h, resultUtm.h);

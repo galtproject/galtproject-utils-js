@@ -1,5 +1,4 @@
 const utmUtils = require('../src/utm');
-const latLonUtils = require('../src/latLon');
 const assert = require('assert');
 
 describe('utm utils', () => {
@@ -12,7 +11,7 @@ describe('utm utils', () => {
         ];
         
         const utmContor = latLonContour.map((latLon) => {
-            return latLonUtils.toUtm(latLon[0], latLon[1]);
+            return utmUtils.fromLatLon(latLon[0], latLon[1]);
         });
 
         assert.equal(utmUtils.area(utmContor), -6841437.324010707);
