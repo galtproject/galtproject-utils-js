@@ -1,47 +1,47 @@
 const common = require('./common');
 
 module.exports = class Utm {
-    static area(polygon) {
-        let area = 0; // Accumulates area in the loop	
-        let j = polygon.length - 1; // The last vertex is the 'previous' one to the first	
+  static area(polygon) {
+    let area = 0; // Accumulates area in the loop	
+    let j = polygon.length - 1; // The last vertex is the 'previous' one to the first	
 
-        let scaleSum = 0;
-        for (let i = 0; i < polygon.length; i++) {
-            area += (polygon[j].x + polygon[i].x) * (polygon[j].y - polygon[i].y);
-            scaleSum += polygon[i].scale;
-            j = i; // j is previous vertex to i	
-        }
-
-        area = area / ((scaleSum / polygon.length) ** 2);
-
-        return area / 2;
-    }
-    
-    static uncompress(compressedUtm) {
-        const mgrsLatBands = 'CDEFGHJKLMNPQRSTUVWXX';
-        
-        let x = compressedUtm[0];
-        let y = compressedUtm[1];
-
-        let latBandNumber = Math.round(compressedUtm[2] / (10 ** 9));
-        let latBand = mgrsLatBands[latBandNumber];
-        let isNorth = Math.round(compressedUtm[2] / (10 ** 6) - latBandNumber * 10 ** 3);
-        let zone = Math.round(compressedUtm[2] / (10 ** 3) - isNorth * 10 ** 3 - latBandNumber * 10 ** 6);
-        let scale = compressedUtm[2] - (zone * 10 ** 3) - (isNorth * 10 ** 6) - (latBandNumber * 10 ** 9);
-        return {
-            x,
-            y,
-            h: isNorth ? 'N' : 'S',
-            latBandNumber,
-            latBand,
-            zone,
-            scale
-        }
+    let scaleSum = 0;
+    for (let i = 0; i < polygon.length; i++) {
+      area += (polygon[j].x + polygon[i].x) * (polygon[j].y - polygon[i].y);
+      scaleSum += polygon[i].scale;
+      j = i; // j is previous vertex to i	
     }
 
-    static toString(utm) {
-        return `${utm.latBand}${utm.zone} ${common.roundToDecimal(utm.x, 6)}E ${common.roundToDecimal(utm.y, 6)}N`;
+    area = area / ((scaleSum / polygon.length) ** 2);
+
+    return area / 2;
+  }
+
+  static uncompress(compressedUtm) {
+    const mgrsLatBands = 'CDEFGHJKLMNPQRSTUVWXX';
+
+    let x = compressedUtm[0];
+    let y = compressedUtm[1];
+
+    let latBandNumber = Math.round(compressedUtm[2] / (10 ** 9));
+    let latBand = mgrsLatBands[latBandNumber];
+    let isNorth = Math.round(compressedUtm[2] / (10 ** 6) - latBandNumber * 10 ** 3);
+    let zone = Math.round(compressedUtm[2] / (10 ** 3) - isNorth * 10 ** 3 - latBandNumber * 10 ** 6);
+    let scale = compressedUtm[2] - (zone * 10 ** 3) - (isNorth * 10 ** 6) - (latBandNumber * 10 ** 9);
+    return {
+      x,
+      y,
+      h: isNorth ? 'N' : 'S',
+      latBandNumber,
+      latBand,
+      zone,
+      scale
     }
+  }
+
+  static toString(utm) {
+    return `${utm.latBand}${utm.zone} ${common.roundToDecimal(utm.x, 6)}E ${common.roundToDecimal(utm.y, 6)}N`;
+  }
 
   static fromLatLon(_lat, _lon) {
     if (!(_lat >= -80 && _lat <= 84)) throw new Error('Outside UTM limits');
@@ -186,17 +186,124 @@ module.exports = class Utm {
       latBandNumber
     };
   }
+
+  static toLatLon(utmObj) {
+    const {zone: z, h} = utmObj;
+
+    const falseEasting = 500e3, falseNorthing = 10000e3;
+
+    const a = 6378137;
+    const f = 1 / 298.257223563;
+    // const { a, f } = this.datum.ellipsoid; // WGS-84: a = 6378137, f = 1/298.257223563;
+
+    const k0 = 0.9996; // UTM scale on the central meridian
+
+    const x = utmObj.x - falseEasting;                            // make x ± relative to central meridian
+    const y = h === 'S' ? utmObj.y - falseNorthing : utmObj.y; // make y ± relative to equator
+
+    // ---- from Karney 2011 Eq 15-22, 36:
+
+    const e = Math.sqrt(f * (2 - f)); // eccentricity
+    const n = f / (2 - f);        // 3rd flattening
+    const n2 = n * n, n3 = n * n2, n4 = n * n3, n5 = n * n4, n6 = n * n5;
+
+    const A = a / (1 + n) * (1 + 1 / 4 * n2 + 1 / 64 * n4 + 1 / 256 * n6); // 2πA is the circumference of a meridian
+
+    const η = x / (k0 * A);
+    const ξ = y / (k0 * A);
+
+    const β = [null, // note β is one-based array (6th order Krüger expressions)
+      1 / 2 * n - 2 / 3 * n2 + 37 / 96 * n3 - 1 / 360 * n4 - 81 / 512 * n5 + 96199 / 604800 * n6,
+      1 / 48 * n2 + 1 / 15 * n3 - 437 / 1440 * n4 + 46 / 105 * n5 - 1118711 / 3870720 * n6,
+      17 / 480 * n3 - 37 / 840 * n4 - 209 / 4480 * n5 + 5569 / 90720 * n6,
+      4397 / 161280 * n4 - 11 / 504 * n5 - 830251 / 7257600 * n6,
+      4583 / 161280 * n5 - 108847 / 3991680 * n6,
+      20648693 / 638668800 * n6];
+
+    let ξʹ = ξ;
+    for (let j = 1; j <= 6; j++) {
+      ξʹ -= β[j] * Math.sin(2 * j * ξ) * Math.cosh(2 * j * η);
+    }
+
+    let ηʹ = η;
+    for (let j = 1; j <= 6; j++) {
+      ηʹ -= β[j] * Math.cos(2 * j * ξ) * Math.sinh(2 * j * η);
+    }
+
+    const sinhηʹ = Math.sinh(ηʹ);
+    const sinξʹ = Math.sin(ξʹ), cosξʹ = Math.cos(ξʹ);
+
+    const τʹ = sinξʹ / Math.sqrt(sinhηʹ * sinhηʹ + cosξʹ * cosξʹ);
+
+    let δτi = null;
+    let τi = τʹ;
+    do {
+      const σi = Math.sinh(e * Math.atanh(e * τi / Math.sqrt(1 + τi * τi)));
+      const τiʹ = τi * Math.sqrt(1 + σi * σi) - σi * Math.sqrt(1 + τi * τi);
+      δτi = (τʹ - τiʹ) / Math.sqrt(1 + τiʹ * τiʹ)
+        * (1 + (1 - e * e) * τi * τi) / ((1 - e * e) * Math.sqrt(1 + τi * τi));
+      τi += δτi;
+    } while (Math.abs(δτi) > 1e-12); // using IEEE 754 δτi -> 0 after 2-3 iterations
+    // note relatively large convergence test as δτi toggles on ±1.12e-16 for eg 31 N 400000 5000000
+    const τ = τi;
+
+    const φ = Math.atan(τ);
+
+    let λ = Math.atan2(sinhηʹ, cosξʹ);
+
+    // ---- convergence: Karney 2011 Eq 26, 27
+
+    let p = 1;
+    for (let j = 1; j <= 6; j++) {
+      p -= 2 * j * β[j] * Math.cos(2 * j * ξ) * Math.cosh(2 * j * η);
+    }
+    let q = 0;
+    for (let j = 1; j <= 6; j++) {
+      q += 2 * j * β[j] * Math.sin(2 * j * ξ) * Math.sinh(2 * j * η);
+    }
+
+    const γʹ = Math.atan(Math.tan(ξʹ) * Math.tanh(ηʹ));
+    const γʺ = Math.atan2(q, p);
+
+    const γ = γʹ + γʺ;
+
+    // ---- scale: Karney 2011 Eq 28
+
+    const sinφ = Math.sin(φ);
+    const kʹ = Math.sqrt(1 - e * e * sinφ * sinφ) * Math.sqrt(1 + τ * τ) * Math.sqrt(sinhηʹ * sinhηʹ + cosξʹ * cosξʹ);
+    const kʺ = A / a / Math.sqrt(p * p + q * q);
+
+    const k = k0 * kʹ * kʺ;
+
+    // ------------
+
+    const λ0 = ((z - 1) * 6 - 180 + 3).toRadians(); // longitude of central meridian
+    λ += λ0; // move λ from zonal to global coordinates
+
+    // round to reasonable precision
+    const lat = Number(φ.toDegrees().toFixed(11)); // nm precision (1nm = 10^-11°)
+    const lon = Number(λ.toDegrees().toFixed(11)); // (strictly lat rounding should be φ⋅cosφ!)
+    const convergence = Number(γ.toDegrees().toFixed(9));
+    const scale = Number(k.toFixed(12));
+
+    return {
+      lat,
+      lon,
+      convergence,
+      scale
+    };
+  }
 };
 
 
 if (typeof Number.prototype.toRadians === 'undefined') {
-  Number.prototype.toRadians = function() {
+  Number.prototype.toRadians = function () {
     return (this * Math.PI) / 180;
   };
 }
 
 if (typeof Number.prototype.toDegrees === 'undefined') {
-  Number.prototype.toDegrees = function() {
+  Number.prototype.toDegrees = function () {
     return this * (180 / Math.PI);
   };
 }
