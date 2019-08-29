@@ -35,7 +35,7 @@ require('yargs')
       describe: 'longitude'
     })
   }, function (argv) {
-    printLatLonConversionTable(argv.lat, argv.lon);
+    printLatLonConversionTable(argv.lat.replace(/[^-0-9. ]/g, ""), argv.lon.replace(/[^-0-9. ]/g, ""));
   })
   .help()
   .argv;
