@@ -1,13 +1,23 @@
 const BN = require("bn.js");
 const bs58 = require('bs58');
+const web3Abi = require('web3-eth-abi');
 const base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 const base32Array = base32.split('');
 
 const GEOHASH_MASK = new BN('0100000000000000000000000000000000000000000000000000000000000000', 16);
 const PACK_MASK = new BN('0200000000000000000000000000000000000000000000000000000000000000', 16);
 
+const Z_RESERVED_MASK = new BN('0000000000000000000000000000000ffffffffffffffffffffffffffffffff', 16);
+const Z_HEIGHT_MASK =   new BN('0000000000000000000000000000000ffffffff000000000000000000000000', 16);
+const Z_GEOHASH5_MASK = new BN('000000000000000000000000000000000000000ffffffffffffffffffffffff', 16);
+
 // 12 symbols each of 5 bits length = 60 bits
 const limit = new BN('1 152 921 504 606 846 975');
+
+// -2_147_483_648
+const Z_MIN = -2147483648;
+// 2_147_483_647
+const Z_MAX = 2147483647;
 
 let decodeMap = {};
 
@@ -189,6 +199,47 @@ function roundToDecimal(number, decimal = 4) {
     return Math.ceil(number * Math.pow(10, decimal)) / Math.pow(10, decimal);
 }
 
+function geohash5ToGeohash5z(height, geohash5) {
+    if ((typeof height !== "number") && (typeof height !== "string")) {
+        throw new TypeError("height should be either a number or a string");
+    }
+    height = parseInt(height, 10);
+
+    requireHeightValid(height);
+
+    if (typeof geohash5 !== "string") {
+        throw new TypeError("geohash5 should be a stringifed number");
+    }
+
+    if (geohash5 === "") {
+        throw new TypeError("geohash5 shouldn't be empty");
+    }
+
+    height = web3Abi.decodeParameter('uint256', web3Abi.encodeParameter('int256', height));
+    height = (new BN(height)).ishln(96);
+    geohash5 = (new BN(geohash5));
+
+    return (geohash5.or(height)).and(Z_RESERVED_MASK);
+}
+
+function geohash5zToGeohash5(geohash5z) {
+    geohash5z = new BN(geohash5z);
+
+    const height = geohash5z.and(Z_HEIGHT_MASK).shrn(96);
+    const geohash5 = geohash5z.and(Z_GEOHASH5_MASK);
+
+    const encoded = web3Abi.encodeParameter('uint256', height.toString(10));
+    const decoded = web3Abi.decodeParameter('int32', encoded);
+
+    return { height: parseInt(decoded, 10), geohash5 };
+}
+
+function requireHeightValid(height) {
+    if (!(Z_MIN <= height && height <= Z_MAX)) {
+        throw new RangeError("Height overflow");
+    }
+}
+
 module.exports = {
     geohashToNumber,
     numberToGeohash,
@@ -196,6 +247,8 @@ module.exports = {
     geohash5ToTokenId,
     geohashToTokenId,
     geohashToTokenIdHex,
+    geohash5ToGeohash5z,
+    geohash5zToGeohash5,
     tokenIdToGeohash5,
     tokenIdToGeohash,
     tokenIdHexToGeohash5,

@@ -125,3 +125,57 @@ describe('#geohashToTokenIdHex()', () => {
         assert.equal(utils.tokenIdToHex("452312848583266388373324160190187140051835877600158453279131187561047470792"), '0x01000000000000000000000000000000000000000000000000000007044b32c8');
     });
 });
+
+
+// 0x00004627
+const height = 17959;
+// 0xfffbb722
+const negativeHeight = -280798;
+// overflowed height
+const overflowedHeight = 2147483648;
+// underflowed height
+const underflowedHeight = -2147483649;
+// u33d9u9n4juh
+const geohash5 = '940245506947434320';
+const positiveGeohash5z = new BN('0000000000000000000000000000000000004627000000000d0c6c4e93424750', 16);
+const negativeGeohash5z = new BN('00000000000000000000000000000000fffbb722000000000d0c6c4e93424750', 16);
+
+describe('#geohash5ToGeohash5z()', () => {
+    it('should encode positive height into geohash5', function() {
+        const res = utils.geohash5ToGeohash5z(height, geohash5);
+        assert.equal(res.toString(10), positiveGeohash5z.toString(10));
+    });
+
+    it('should encode negative height into geohash5', function() {
+        const res = utils.geohash5ToGeohash5z(negativeHeight, geohash5);
+        assert.equal(res.toString(10), negativeGeohash5z.toString(10));
+    });
+
+    it('throws on overflowed height encoded', function() {
+        assert.throws(() => {
+            utils.geohash5ToGeohash5z(overflowedHeight, geohash5)
+        }, RangeError('Height overflow'));
+    });
+
+    it('throws on overflowed height encoded', function() {
+        assert.throws(() => {
+            utils.geohash5ToGeohash5z(underflowedHeight, geohash5)
+        }, RangeError('Height overflow'));
+    });
+});
+
+describe('#geohash5zToGeohash5()', () => {
+    it('should decode positive height and geohash5', async function() {
+        const res = utils.geohash5zToGeohash5(positiveGeohash5z);
+
+        assert.equal(res.height, height);
+        assert.equal(res.geohash5, geohash5);
+    });
+
+    it('should decode negative height and geohash5', async function() {
+        const res = utils.geohash5zToGeohash5(negativeGeohash5z);
+
+        assert.equal(res.height, negativeHeight);
+        assert.equal(res.geohash5, geohash5);
+    });
+});
