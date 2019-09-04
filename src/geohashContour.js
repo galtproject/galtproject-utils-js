@@ -3,8 +3,6 @@ const _ = require('lodash');
 const Geohash = require('./geohash');
 const GeohashExtra = require('./geohashExtra');
 const Utm = require('./utm');
-const LatLon = require('./latLon');
-const geojsonArea = require('@mapbox/geojson-area');
 const martinezRueda = require('martinez-polygon-clipping');
 
 module.exports = class GeohashContour {
@@ -16,7 +14,7 @@ module.exports = class GeohashContour {
     static area(contour) {
         return Math.abs(Utm.area(contour.map((geohash) => {
             const coors = GeohashExtra.decodeToLatLon(geohash);
-            return LatLon.toUtm(coors.lat, coors.lon);
+            return Utm.fromLatLon(coors.lat, coors.lon);
         })));
     }
 
