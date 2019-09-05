@@ -2,6 +2,7 @@ const ngeohash = require('ngeohash');
 const _ = require('lodash');
 const Geohash = require('./geohash');
 const GeohashExtra = require('./geohashExtra');
+const Coordinates = require('./coordinates');
 const Utm = require('./utm');
 const martinezRueda = require('martinez-polygon-clipping');
 
@@ -33,21 +34,7 @@ module.exports = class GeohashContour {
             return {x: coors.lat, y: coors.lon};
         });
 
-        // Find min max to get center
-        // Sort from top to bottom
-        points.sort((a, b) => a.y - b.y);
-
-        // Get center y
-        const cy = (points[0].y + points[points.length - 1].y) / 2;
-
-        // Sort from right to left
-        points.sort((a, b) => b.x - a.x);
-
-        // Get center x
-        const cx = (points[0].x + points[points.length - 1].x) / 2;
-
-        // Center point
-        const center = {x: cx, y: cy};
+        const center = Coordinates.polygonCenter(points.map(p => [p.x, p.y]));
 
         // Pre calculate the angles as it will be slow in the sort
         // As the points are sorted from right to left the first point
@@ -56,7 +43,7 @@ module.exports = class GeohashContour {
         // Starting angle used to reference other angles
         let startAng;
         points.forEach(point => {
-            let ang = Math.atan2(point.y - center.y, point.x - center.x);
+            let ang = Math.atan2(point.y - center[1], point.x - center[0]);
             if (!startAng) {
                 startAng = ang
             }
