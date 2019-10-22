@@ -33,6 +33,10 @@ describe('geohash utils', () => {
         assert.equal(geohashUtils.getParent("gfpe"), "gfp");
         
         assert.equal(geohashUtils.getChildByDirection("gfp", "sw"), "gfp0");
+        assert.equal(geohashUtils.getChildByDirection("gfp", "sw", 5), "gfp00");
+        assert.equal(geohashUtils.getChildByDirection("gfp", "sw", 12), "gfp000000000");
+        assert.equal(geohashUtils.getChildByDirection("gfp", "se", 12), "gfpbpbpbpbpb");
+        
         assert.deepEqual(geohashUtils.getChildrenByDirection("gfp", "w"), ["gfp0", "gfp1", "gfp4", "gfp5", "gfph", "gfpj", "gfpn", "gfpp"]);
         
         assert.deepEqual(geohashUtils.getChildren("gfp"), ['gfp0', 'gfp1', 'gfp2', 'gfp3', 'gfp4', 'gfp5', 'gfp6', 'gfp7', 
