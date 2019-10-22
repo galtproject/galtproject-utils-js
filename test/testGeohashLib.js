@@ -1,7 +1,7 @@
 const geohashUtils = require('../src/geohash');
 const assert = require('assert');
 
-describe.only('geohash utils', () => {
+describe('geohash utils', () => {
     it('should detect right neighbours', function () {
         assert.equal(geohashUtils.neighbourByDirection("u44", "e"), "u45");
         assert.equal(geohashUtils.neighbourByDirection("gfp", "e"), "u40");
