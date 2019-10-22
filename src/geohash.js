@@ -280,11 +280,15 @@ module.exports = class Geohash {
      * Get child by two-sides direction. For example: "gfp" have "gfp0" child on "sw" direction 
      * @param geohash
      * @param direction
+     * @param precision
      * @returns {*}
      */
-    static getChildByDirection(geohash, direction) {
+    static getChildByDirection(geohash, direction, precision = null) {
         if (direction.length !== 2 || !geohash) {
             return null;
+        }
+        if(precision && (geohash.length >= precision || precision > 12)) {
+          return null;
         }
 
         const firstDirection = direction[0];
@@ -306,7 +310,13 @@ module.exports = class Geohash {
         if(!resultSymbol) {
             return null;
         }
-        return geohash + resultSymbol;
+        const resultGeohash = geohash + resultSymbol;
+        
+        if(precision && resultGeohash.length < precision) {
+            return Geohash.getChildByDirection(resultGeohash, direction, precision)
+        } else {
+            return resultGeohash;
+        }
     }
 
     /**
