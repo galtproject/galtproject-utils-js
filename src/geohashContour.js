@@ -19,6 +19,10 @@ module.exports = class GeohashContour {
         })));
     }
 
+    static center(contour) {
+      return Coordinates.polygonCenter(contour.map((g) => GeohashExtra.decodeToLatLon(g, true)));
+    }
+    
     /**
      * Sort geohashes of contour in clockwise direction
      * @param contour
