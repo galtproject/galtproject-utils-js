@@ -20,7 +20,8 @@ module.exports = class GeohashContour {
     }
 
     static center(contour) {
-      return Coordinates.polygonCenter(contour.map((g) => GeohashExtra.decodeToLatLon(g, true)));
+        const pointCenter = Coordinates.polygonCenter(contour.map((g) => GeohashExtra.decodeToLatLon(g, true)));
+        return GeohashExtra.encodeFromLatLng(pointCenter[0], pointCenter[1], contour[0].length);
     }
     
     /**
