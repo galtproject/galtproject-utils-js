@@ -1,5 +1,11 @@
 const ngeohash = require('ngeohash');
 const _ = require('lodash');
+
+const find = require('lodash/find');
+const intersection = require('lodash/intersection');
+const findIndex = require('lodash/findIndex');
+const isNil = require('lodash/isNil');
+
 const Geohash = require('./geohash');
 const GeohashExtra = require('./geohashExtra');
 const Coordinates = require('./coordinates');
@@ -147,12 +153,12 @@ module.exports = class GeohashContour {
             sortedPoints.push(points[addEdge[0]]);
             
             let nextEdge;
-            const foundEdgeByBeginning = _.find(edgesStack, (edge) => edge[0] === addEdge[1]);
+            const foundEdgeByBeginning = find(edgesStack, (edge) => edge[0] === addEdge[1]);
             if(foundEdgeByBeginning) {
                 nextEdge = foundEdgeByBeginning;
                 edgesStack.splice(edgesStack.indexOf(foundEdgeByBeginning), 1);
             } else {
-                const foundEdgeByEnd = _.find(edgesStack, (edge) => edge[1] === addEdge[1] && edge[0] !== addEdge[0]);
+                const foundEdgeByEnd = find(edgesStack, (edge) => edge[1] === addEdge[1] && edge[0] !== addEdge[0]);
                 //TODO: solve foundEdgeByEnd undefined problem
                 nextEdge = [foundEdgeByEnd[1], foundEdgeByEnd[0]];
                 edgesStack.splice(edgesStack.indexOf(foundEdgeByEnd), 1);
@@ -204,7 +210,7 @@ module.exports = class GeohashContour {
 
         if(checkAndReplaceIntersectionGeohashes) {
             // Replace geohash by neighbour if geohash not inside baseContour
-            const intersectionGeohashes = _.intersection(result.base, result.split);
+            const intersectionGeohashes = intersection(result.base, result.split);
 
             intersectionGeohashes.forEach(geohash => {
                 const geohashInside = GeohashContour.isGeohashInsideContour(geohash, baseContour, false);
@@ -213,9 +219,9 @@ module.exports = class GeohashContour {
                         const cornerNeighbour = Geohash.neighbourByDirection(geohash, corner);
                         const cornerNeighbourInside = GeohashContour.isGeohashInsideContour(cornerNeighbour, baseContour, false);
                         if(cornerNeighbourInside) {
-                            const baseIndex = _.findIndex(result.base, function(g) { return g == geohash; });
+                            const baseIndex = findIndex(result.base, function(g) { return g == geohash; });
                             result.base[baseIndex] = cornerNeighbour;
-                            const splitIndex = _.findIndex(result.split, function(g) { return g == geohash; });
+                            const splitIndex = findIndex(result.split, function(g) { return g == geohash; });
                             result.split[splitIndex] = cornerNeighbour;
                         }
                         return cornerNeighbourInside;
@@ -279,16 +285,16 @@ module.exports = class GeohashContour {
         contour.forEach((geohash) => {
             const coordinates = GeohashExtra.decodeToLatLon(geohash);
 
-            if (_.isNil(maxLat) || coordinates.lat > maxLat) {
+            if (isNil(maxLat) || coordinates.lat > maxLat) {
                 maxLat = coordinates.lat;
             }
-            if (_.isNil(minLat) || coordinates.lat < minLat) {
+            if (isNil(minLat) || coordinates.lat < minLat) {
                 minLat = coordinates.lat;
             }
-            if (_.isNil(maxLon) || coordinates.lon > maxLon) {
+            if (isNil(maxLon) || coordinates.lon > maxLon) {
                 maxLon = coordinates.lon;
             }
-            if (_.isNil(minLon) || coordinates.lon < minLon) {
+            if (isNil(minLon) || coordinates.lon < minLon) {
                 minLon = coordinates.lon;
             }
         });

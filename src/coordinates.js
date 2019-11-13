@@ -1,9 +1,9 @@
 const common = require('./common');
-const _ = require('lodash');
+const clone = require('lodash/clone');
 
 module.exports = class Utm {
   static polygonCenter(polygon) {
-    const points = _.clone(polygon);
+    const points = clone(polygon);
 
     points.sort((a, b) => a[1] - b[1]);
     // Get center y
