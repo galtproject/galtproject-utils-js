@@ -14,9 +14,9 @@ describe('contractPoint utils', () => {
   it('should convert latLone to contractPoint and vise versa', function () {
     const latLon = {lat: 102.1112223334, lon: 80.5556667778};
     const height = 11;
-    const result = contractPoint.encodeFromLatLng(latLon.lat, latLon.lon, height);
+    const result = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
     assert.equal(result, '3743106054966518952475969310120999601538');
-    const decoded = contractPoint.decodeToLatLon(result);
+    const decoded = contractPoint.decodeToLatLonHeight(result);
     assert.equal(latLon.lat, decoded.lat);
     assert.equal(latLon.lon, decoded.lon);
     assert.equal(height, decoded.height);

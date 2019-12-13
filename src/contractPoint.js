@@ -20,13 +20,23 @@ const Z_LAT_MASK =      new BN('0000000000000000000000000000000ffffffffffffffff0
 const Z_LON_MASK =      new BN('00000000000000000000000000000000000000000000000ffffffffffffffff', 16);
 
 module.exports = class ContractPoint {
-  static decodeToLatLon(contractPoint) {
+
+  static decodeToLatLonHeight(contractPoint) {
     const xyResult = ContractPoint.decodeToXY(contractPoint);
     return {
       height: xyResult.z,
       lat: xyResult.x / 10 ** 10,
       lon: xyResult.y / 10 ** 10
     };
+  }
+
+  static decodeToLatLon(contractPoint, arrayMode = false) {
+    const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
+    if (arrayMode) {
+      return [latLonHeight.lat, latLonHeight.lon];
+    } else {
+      return {lat: latLonHeight.lat, lon: latLonHeight.lon};
+    }
   }
 
   static decodeToXY(contractPoint) {
@@ -48,8 +58,11 @@ module.exports = class ContractPoint {
     return { z: parseInt(decodedHeight, 10), x: parseInt(decodedX, 10), y: parseInt(decodedY, 10) };
   }
 
-  // 0xReserved....Height........lat..................lon..................
-  static encodeFromLatLng(lat, lon, height = 0) {
+  static encodeFromLatLng(lat, lon) {
+    return ContractPoint.encodeFromLatLngHeight(lat, lon);
+  }
+
+  static encodeFromLatLngHeight(lat, lon, height = 0) {
     return ContractPoint.encodeFromXY(Math.round(lat * 10 ** 10), Math.round(lon * 10 ** 10), height).toString(10);
   }
 
