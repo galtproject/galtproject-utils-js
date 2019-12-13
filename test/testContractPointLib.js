@@ -15,7 +15,7 @@ describe('contractPoint utils', () => {
     const latLon = {lat: 102.1112223334, lon: 80.5556667778};
     const height = 11;
     const result = geohashPseudo.encodeFromLatLng(latLon.lat, latLon.lon, height);
-    assert.equal(result.toString(10), '3743106054966518952475969310120999601538');
+    assert.equal(result, '3743106054966518952475969310120999601538');
     const decoded = geohashPseudo.decodeToLatLon(result);
     assert.equal(latLon.lat, decoded.lat);
     assert.equal(latLon.lon, decoded.lon);
