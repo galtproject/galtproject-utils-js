@@ -2,7 +2,12 @@
  * Extra geohash operations, which requires some dependencies like ngeohash and lodash
  */
 const ngeohash = require('ngeohash');
-const _ = require('lodash');
+
+const clone = require('lodash/clone');
+const concat = require('lodash/concat');
+const uniq = require('lodash/uniq');
+const includes = require('lodash/includes');
+
 const Geohash = require('./geohash');
 const Utm = require('./utm');
 
@@ -39,8 +44,8 @@ module.exports = class GeohashExtra {
       return geohashesToAddList;
     }
 
-    existsGeohashesList = _.clone(existsGeohashesList);
-    let actualGeohashesToAdd = _.clone(geohashesToAddList);
+    existsGeohashesList = clone(existsGeohashesList);
+    let actualGeohashesToAdd = clone(geohashesToAddList);
 
     let preparedGeohashes = [];
     let i = 0;
@@ -50,7 +55,7 @@ module.exports = class GeohashExtra {
       if (!geohash) {
         break;
       }
-      if (_.includes(existsGeohashesList, geohash)) {
+      if (includes(existsGeohashesList, geohash)) {
         actualGeohashesToAdd.splice(actualGeohashesToAdd.indexOf(geohash), 1);
         continue;
       }
@@ -70,7 +75,7 @@ module.exports = class GeohashExtra {
     if (preparedGeohashes.length > 0 && actualGeohashesToAdd.length > 0) {
       const additionalPreparedGeohashes = Geohash.sortGeohashesByNeighbourDirection(existsGeohashesList, actualGeohashesToAdd);
       if (additionalPreparedGeohashes.length) {
-        preparedGeohashes = _.concat(additionalPreparedGeohashes, preparedGeohashes);
+        preparedGeohashes = concat(additionalPreparedGeohashes, preparedGeohashes);
       }
     }
 
@@ -83,7 +88,7 @@ module.exports = class GeohashExtra {
       return geohashesToRemoveList;
     }
 
-    geohashesToRemoveList = _.uniq(geohashesToRemoveList);
+    geohashesToRemoveList = uniq(geohashesToRemoveList);
 
     let preparedGeohashes = [];
     let i = 0;
