@@ -8,17 +8,26 @@
  */
 
 const contractPoint = require('../src/contractPoint');
+const utm = require('../src/utm');
 const assert = require('assert');
 
 describe('contractPoint utils', () => {
   it('should convert latLone to contractPoint and vise versa', function () {
-    const latLon = {lat: 102.1112223334, lon: 80.5556667778};
+    const latLon = {lat: 10.1112223334, lon: 80.5556667778};
     const height = 11;
-    const result = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
-    assert.equal(result, '3743106054966518952475969310120999601538');
-    const decoded = contractPoint.decodeToLatLonHeight(result);
+    const contractPointResult = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
+    assert.equal(contractPointResult, '3743106037995514404663181823400999601538');
+    const decoded = contractPoint.decodeToLatLonHeight(contractPointResult);
     assert.equal(latLon.lat, decoded.lat);
     assert.equal(latLon.lon, decoded.lon);
     assert.equal(height, decoded.height);
+
+    const utmFromLatLonResult = utm.fromLatLon(latLon.lat, latLon.lon);
+    const utmFromContractPointResult = contractPoint.decodeToUtm(contractPointResult);
+    assert.deepEqual(utmFromLatLonResult, utmFromContractPointResult);
+
+    const contractPointWithoutHeight = contractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
+    const contourPointFromUtmResult = contractPoint.encodeFromUtm(utmFromContractPointResult);
+    assert.equal(contourPointFromUtmResult, contractPointWithoutHeight);
   });
 });

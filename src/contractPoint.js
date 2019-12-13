@@ -8,11 +8,8 @@
  */
 
 const BN = require("bn.js");
-const bs58 = require('bs58');
 const web3Abi = require('web3-eth-abi');
-const base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
-const base32Array = base32.split('');
-
+const Utm = require('./utm');
 
 const Z_RESERVED_MASK = new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
 const Z_HEIGHT_MASK =   new BN('00000000000000000000000ffffffff00000000000000000000000000000000', 16);
@@ -75,5 +72,15 @@ module.exports = class ContractPoint {
     z = (new BN(z)).ishln(64 * 2);
 
     return (y.or(x).or(z)).and(Z_RESERVED_MASK);
+  }
+
+  static decodeToUtm(contractPoint) {
+    const latLon = ContractPoint.decodeToLatLon(contractPoint, true);
+    return Utm.fromLatLon(latLon[0], latLon[1]);
+  }
+
+  static encodeFromUtm(utm) {
+    const latLon = Utm.toLatLon(utm);
+    return ContractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
   }
 };
