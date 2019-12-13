@@ -83,4 +83,11 @@ module.exports = class ContractPoint {
     const latLon = Utm.toLatLon(utm);
     return ContractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
   }
+
+  static contourArea(contour) {
+    return Math.abs(Utm.area(contour.map((contractPoint) => {
+      const coors = ContractPoint.decodeToLatLon(contractPoint);
+      return Utm.fromLatLon(coors.lat, coors.lon);
+    })));
+  }
 };
