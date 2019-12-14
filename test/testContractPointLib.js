@@ -42,13 +42,14 @@ describe('contractPoint utils', () => {
   });
 
   it.only('should convert negative latLon to contractPoint and vise versa', function () {
-    const negativeLatLon = {lat: -38.0731887304, lon: 146.1784383491};
-    const negativeContractPointWithoutHeight = contractPoint.encodeFromLatLng(negativeLatLon.lat, negativeLatLon.lon);
+    [{lat: -38.0731887304, lon: 146.1784383491}, {lat: -38.0731887304, lon: -146.1784383491}, {lat: 38.0731887304, lon: -146.1784383491}].forEach(negativeLatLon => {
+      const negativeContractPointWithoutHeight = contractPoint.encodeFromLatLng(negativeLatLon.lat, negativeLatLon.lon);
 
-    const negativeLatLonHeight = contractPoint.decodeToLatLonHeight(negativeContractPointWithoutHeight);
-    assert.equal(negativeLatLon.lat, negativeLatLonHeight.lat);
-    assert.equal(negativeLatLon.lon, negativeLatLonHeight.lon);
-    assert.equal(negativeLatLonHeight.height, 0);
+      const negativeLatLonHeight = contractPoint.decodeToLatLonHeight(negativeContractPointWithoutHeight);
+      assert.equal(negativeLatLon.lat, negativeLatLonHeight.lat);
+      assert.equal(negativeLatLon.lon, negativeLatLonHeight.lon);
+      assert.equal(negativeLatLonHeight.height, 0);
+    })
   });
 
   it('should calculate area correctly', function () {
