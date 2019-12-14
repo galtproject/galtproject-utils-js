@@ -112,6 +112,7 @@ module.exports = class ContractPoint {
     return ContractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
   }
 
+  //TODO: find the better solution do tetect contract point
   static isContractPoint(value) {
     try {
       const bn = (new BN(value.toString(10))).toString(16);
