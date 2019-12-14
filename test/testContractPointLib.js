@@ -58,7 +58,6 @@ describe('contractPoint utils', () => {
     [{dx: 5, dy: 0}, {dx: 0, dy: 5}, {dx: 5, dy: 5}, {dx: -5, dy: 0}, {dx: 0, dy: -5}, {dx: -5, dy: -5}, {dx: 5, dy: -5}, {dx: -5, dy: 5}].forEach((shiftMeters) => {
       const resultContractPoint = contractPoint.shift(baseContractPoint, shiftMeters.dx, shiftMeters.dy);
 
-      console.log('resultContractPoint', resultContractPoint);
       const basePointUtm = contractPoint.decodeToUtm(baseContractPoint);
       const resultPointUtm = contractPoint.decodeToUtm(resultContractPoint);
       assert.equal(roundToDecimal(basePointUtm.x + shiftMeters.dx), roundToDecimal(resultPointUtm.x));
