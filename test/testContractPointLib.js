@@ -31,8 +31,14 @@ describe('contractPoint utils', () => {
     assert.deepEqual(utmFromLatLonResult, utmFromContractPointResult);
 
     const contractPointWithoutHeight = contractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
+    assert.equal(contractPointWithoutHeight, '1865191306566061141651549275522');
     const contourPointFromUtmResult = contractPoint.encodeFromUtm(utmFromContractPointResult);
     assert.equal(contourPointFromUtmResult, contractPointWithoutHeight);
+
+    const latLonHeight = contractPoint.decodeToLatLonHeight(contractPointWithoutHeight);
+    assert.equal(latLon.lat, latLonHeight.lat);
+    assert.equal(latLon.lon, latLonHeight.lon);
+    assert.equal(latLonHeight.height, 0);
   });
 
   it('should calculate area correctly', function () {
