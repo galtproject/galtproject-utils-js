@@ -12,10 +12,11 @@ const web3Abi = require('web3-eth-abi');
 const Utm = require('./utm');
 const LatLon = require('./latLon');
 
-const Z_RESERVED_MASK = new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
-const Z_HEIGHT_MASK =   new BN('00000000000000000000000ffffffff00000000000000000000000000000000', 16);
-const Z_LAT_MASK =      new BN('0000000000000000000000000000000ffffffffffffffff0000000000000000', 16);
-const Z_LON_MASK =      new BN('00000000000000000000000000000000000000000000000ffffffffffffffff', 16);
+const XYZ_MASK =         new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
+const XY_MASK =          new BN('0000000000000000000000000000000ffffffffffffffffffffffffffffffff', 16);
+const Z_HEIGHT_MASK =    new BN('00000000000000000000000ffffffff00000000000000000000000000000000', 16);
+const Z_LAT_MASK =       new BN('0000000000000000000000000000000ffffffffffffffff0000000000000000', 16);
+const Z_LON_MASK =       new BN('00000000000000000000000000000000000000000000000ffffffffffffffff', 16);
 
 module.exports = class ContractPoint {
 
@@ -73,7 +74,7 @@ module.exports = class ContractPoint {
     x = (new BN(x)).ishln(64);
     z = (new BN(z)).ishln(64 * 2);
 
-    return (y.or(x).or(z)).and(Z_RESERVED_MASK);
+    return (y.or(x).and(XY_MASK).or(z)).and(XYZ_MASK);
   }
 
   static decodeToUtm(contractPoint) {
