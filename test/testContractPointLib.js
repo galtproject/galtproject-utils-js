@@ -41,7 +41,7 @@ describe('contractPoint utils', () => {
     assert.equal(latLonHeight.height, 0);
   });
 
-  it.only('should convert negative latLon to contractPoint and vise versa', function () {
+  it('should convert negative latLon to contractPoint and vise versa', function () {
     [{lat: -38.0731887304, lon: 146.1784383491}, {lat: -38.0731887304, lon: -146.1784383491}, {lat: 38.0731887304, lon: -146.1784383491}].forEach(negativeLatLon => {
       const negativeContractPointWithoutHeight = contractPoint.encodeFromLatLng(negativeLatLon.lat, negativeLatLon.lon);
 
