@@ -11,7 +11,7 @@ module.exports = class Utm {
     let area = toBN(0); // Accumulates area in the loop
     let j = polygon.length - 1; // The last vertex is the 'previous' one to the first
 
-    const scales = [];
+    let scales = [];
     const zones = [];
     let scaleSum = toBN(0);
     for (let i = 0; i < polygon.length; i++) {
@@ -27,7 +27,10 @@ module.exports = class Utm {
       scaleSum = scaleSum.add(toBN(polygon[i].scale));
       j = i; // j is previous vertex to i
     }
-    if(uniq(scales.map(s => Math.round(s * 10 ** 7))).length === 1 || uniq(zones).length === 1) {
+
+    scales = scales.map(s => Math.round(s * 10 ** 6));
+
+    if(uniq(scales).length === 1) {
       // the same scales, no need to apply it
       area = area.div(toBN(1));
     } else {

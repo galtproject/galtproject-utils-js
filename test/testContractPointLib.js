@@ -35,7 +35,7 @@ describe('contractPoint utils', () => {
     assert.equal(contourPointFromUtmResult, contractPointWithoutHeight);
   });
 
-  it.only('should calculate area correctly', function () {
+  it('should calculate area correctly', function () {
     const basePointLatLon = {lat: 50.111222333444, lon: 80.555666777888};
 
     [5, 50, 500].forEach((shiftMeters) => {
