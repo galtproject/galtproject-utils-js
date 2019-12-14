@@ -14,9 +14,9 @@ const LatLon = require('./latLon');
 
 const XYZ_MASK =         new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
 const XY_MASK =          new BN('0000000000000000000000000000000ffffffffffffffffffffffffffffffff', 16);
-const Z_HEIGHT_MASK =    new BN('00000000000000000000000ffffffff00000000000000000000000000000000', 16);
-const Z_LAT_MASK =       new BN('0000000000000000000000000000000ffffffffffffffff0000000000000000', 16);
-const Z_LON_MASK =       new BN('00000000000000000000000000000000000000000000000ffffffffffffffff', 16);
+const HEIGHT_MASK =      new BN('00000000000000000000000ffffffff00000000000000000000000000000000', 16);
+const LAT_MASK =         new BN('0000000000000000000000000000000ffffffffffffffff0000000000000000', 16);
+const LON_MASK =         new BN('00000000000000000000000000000000000000000000000ffffffffffffffff', 16);
 
 module.exports = class ContractPoint {
 
@@ -41,9 +41,9 @@ module.exports = class ContractPoint {
   static decodeToXY(contractPoint) {
     contractPoint = new BN(contractPoint);
 
-    const z = contractPoint.and(Z_HEIGHT_MASK).shrn(64 * 2);
-    const x = contractPoint.and(Z_LAT_MASK).shrn(64);
-    const y = contractPoint.and(Z_LON_MASK);
+    const z = contractPoint.and(HEIGHT_MASK).shrn(64 * 2);
+    const x = contractPoint.and(LAT_MASK).shrn(64);
+    const y = contractPoint.and(LON_MASK);
 
     const encodedHeight = web3Abi.encodeParameter('uint256', z.toString(10));
     const decodedHeight = web3Abi.decodeParameter('int32', encodedHeight);
@@ -74,7 +74,7 @@ module.exports = class ContractPoint {
     x = (new BN(x)).ishln(64);
     z = (new BN(z)).ishln(64 * 2);
 
-    return (y.or(x).and(XY_MASK).or(z)).and(XYZ_MASK);
+    return (y.and(LON_MASK).or(x).and(XY_MASK).or(z)).and(XYZ_MASK);
   }
 
   static decodeToUtm(contractPoint) {
