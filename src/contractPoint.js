@@ -10,6 +10,7 @@
 const BN = require("bn.js");
 const web3Abi = require('web3-eth-abi');
 const Utm = require('./utm');
+const LatLon = require('./latLon');
 
 const Z_RESERVED_MASK = new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
 const Z_HEIGHT_MASK =   new BN('00000000000000000000000ffffffff00000000000000000000000000000000', 16);
@@ -90,5 +91,11 @@ module.exports = class ContractPoint {
       return Utm.fromLatLon(coors.lat, coors.lon);
     })));
     return Math.round(area * 100) / 100;
+  }
+
+  static shift(contractPoint, dx, dy) {
+    const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
+    const resultLatLon = LatLon.shift(latLonHeight.lat, latLonHeight.lon, dx, dy);
+    return ContractPoint.encodeFromLatLngHeight(resultLatLon.lat, resultLatLon.lon, latLonHeight.height);
   }
 };
