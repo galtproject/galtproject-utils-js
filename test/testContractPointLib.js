@@ -16,7 +16,7 @@ const assert = require('assert');
 const clone = require('lodash/clone');
 
 describe('contractPoint utils', () => {
-  it.only('should convert latLon to contractPoint and vise versa', function () {
+  it('should convert latLon to contractPoint and vise versa', function () {
     const latLon = {lat: 10.1112223334, lon: 80.5556667778};
     const height = 11;
     const contractPointResult = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
@@ -39,7 +39,9 @@ describe('contractPoint utils', () => {
     assert.equal(latLon.lat, latLonHeight.lat);
     assert.equal(latLon.lon, latLonHeight.lon);
     assert.equal(latLonHeight.height, 0);
+  });
 
+  it.only('should convert negative latLon to contractPoint and vise versa', function () {
     const negativeLatLon = {lat: -38.0731887304, lon: 146.1784383491};
     const negativeContractPointWithoutHeight = contractPoint.encodeFromLatLng(negativeLatLon.lat, negativeLatLon.lon);
 
