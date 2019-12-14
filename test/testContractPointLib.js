@@ -8,7 +8,8 @@
  */
 
 const contractPoint = require('../src/contractPoint');
-const utm = require('../src/utm');
+const utmLib = require('../src/utm');
+const latLonLib = require('../src/latLon');
 const geohashExtra = require('../src/geohashExtra');
 const geohashContour = require('../src/geohashContour');
 const assert = require('assert');
@@ -25,7 +26,7 @@ describe('contractPoint utils', () => {
     assert.equal(latLon.lon, decoded.lon);
     assert.equal(height, decoded.height);
 
-    const utmFromLatLonResult = utm.fromLatLon(latLon.lat, latLon.lon);
+    const utmFromLatLonResult = utmLib.fromLatLon(latLon.lat, latLon.lon);
     const utmFromContractPointResult = contractPoint.decodeToUtm(contractPointResult);
     assert.deepEqual(utmFromLatLonResult, utmFromContractPointResult);
 
@@ -34,22 +35,23 @@ describe('contractPoint utils', () => {
     assert.equal(contourPointFromUtmResult, contractPointWithoutHeight);
   });
 
-  it('should calculate area correctly', function () {
-    const basePointLatLon = {lat: 10.111222333444, lon: 80.555666777888};
+  it.only('should calculate area correctly', function () {
+    const basePointLatLon = {lat: 50.111222333444, lon: 80.555666777888};
 
-    const basePointUtm = utm.fromLatLon(basePointLatLon.lat, basePointLatLon.lon);
-    const secondPointUtm = clone(basePointUtm);
-    secondPointUtm.x += 5;
-    const thirdPointUtm = clone(secondPointUtm);
-    thirdPointUtm.y += 5;
-    const fourthPointUtm = clone(thirdPointUtm);
-    fourthPointUtm.x -= 5;
+    [5, 50, 500].forEach((shiftMeters) => {
+      const firstPoint = basePointLatLon;
+      const secondPoint = latLonLib.shift(basePointLatLon.lat, basePointLatLon.lon, shiftMeters, 0);
+      const thirdPoint = latLonLib.shift(basePointLatLon.lat, basePointLatLon.lon, 0, shiftMeters);
+      const fourthPoint = latLonLib.shift(basePointLatLon.lat, basePointLatLon.lon, shiftMeters * -1, 0);
 
-    const utmPoints = [basePointUtm, secondPointUtm, thirdPointUtm, fourthPointUtm];
-    const utmArea = Math.abs(utm.area(utmPoints));
-    assert.equal(utmArea, 25);
+      const latLonPoints = [firstPoint, secondPoint, thirdPoint, fourthPoint];
+      const latLonArea = Math.abs(latLonLib.area(latLonPoints));
+      console.log('latLonArea', latLonArea);
+      // assert.equal(latLonArea, shiftMeters * shiftMeters);
 
-    const contractPointArea = contractPoint.contourArea(utmPoints.map(contractPoint.encodeFromUtm));
-    assert.equal(utmArea, contractPointArea);
+      const contractPointArea = contractPoint.contourArea(latLonPoints.map(l => contractPoint.encodeFromLatLng(l.lat, l.lon)));
+      console.log('contractPointArea', contractPointArea);
+      // assert.equal(latLonArea, contractPointArea);
+    });
   })
 });

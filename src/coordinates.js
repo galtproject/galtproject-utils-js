@@ -1,7 +1,7 @@
 const common = require('./common');
 const clone = require('lodash/clone');
 
-module.exports = class Utm {
+module.exports = class Coordinates {
   static polygonCenter(polygon) {
     const points = clone(polygon);
 

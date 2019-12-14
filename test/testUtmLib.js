@@ -14,7 +14,7 @@ describe('utm utils', () => {
       return utmUtils.fromLatLon(latLon[0], latLon[1]);
     });
 
-    assert.equal(utmUtils.area(utmContor), -6841437.324010707);
+    assert.equal(utmUtils.area(utmContor), -6841437.324010665);
   });
 
   it('should correctly uncompress', function () {
@@ -40,7 +40,7 @@ describe('utm utils', () => {
     });
     assert.equal(result, 'N48 443413.9761E 136017.8858N');
   });
-  
+
   it('should correctly convert latLon to utm', function () {
     const latLonToCheck = [
       [-74.0550677213, -90.318972094],
@@ -67,9 +67,9 @@ describe('utm utils', () => {
       assert.equal(shouldBeUtmByIndex[index].y, resultUtm.y);
       assert.equal(shouldBeUtmByIndex[index].scale, resultUtm.scale);
       assert.equal(shouldBeUtmByIndex[index].convergence, resultUtm.convergence);
-      
+
       const resultLatLon = utmUtils.toLatLon(resultUtm);
-      
+
       assert.equal(Math.abs(resultLatLon.lat - latLon[0]) < 0.00000001, true);
       assert.equal(Math.abs(resultLatLon.lon - latLon[1]) < 0.00000001, true);
     });
