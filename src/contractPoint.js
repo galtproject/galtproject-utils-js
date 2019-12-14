@@ -103,7 +103,7 @@ module.exports = class ContractPoint {
   }
 
   static decodeToGeohash(contractPoint, precision = 12) {
-    const latLon = ContractPoint.decodeToLatLon(contractPoint, true);
+    const latLon = ContractPoint.decodeToLatLon(contractPoint);
     return GeohashExtra.encodeFromLatLng(latLon.lat, latLon.lon, precision);
   }
 

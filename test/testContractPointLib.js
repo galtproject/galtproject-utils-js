@@ -10,6 +10,7 @@
 const contractPoint = require('../src/contractPoint');
 const utmLib = require('../src/utm');
 const latLonLib = require('../src/latLon');
+const geohashExtra = require('../src/geohashExtra');
 const assert = require('assert');
 
 describe('contractPoint utils', () => {
@@ -23,6 +24,10 @@ describe('contractPoint utils', () => {
     assert.equal(latLon.lat, decoded.lat);
     assert.equal(latLon.lon, decoded.lon);
     assert.equal(height, decoded.height);
+
+    const geohashFromContractPoint = contractPoint.decodeToGeohash(contractPointResult, 12);
+    const geohashFromLatLon = geohashExtra.encodeFromLatLng(latLon.lat, latLon.lon, 12);
+    assert.equal(geohashFromContractPoint, geohashFromLatLon);
 
     const utmFromLatLonResult = utmLib.fromLatLon(latLon.lat, latLon.lon);
     const utmFromContractPointResult = contractPoint.decodeToUtm(contractPointResult);
