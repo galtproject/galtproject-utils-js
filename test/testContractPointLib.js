@@ -9,10 +9,13 @@
 
 const contractPoint = require('../src/contractPoint');
 const utm = require('../src/utm');
+const geohashExtra = require('../src/geohashExtra');
+const geohashContour = require('../src/geohashContour');
 const assert = require('assert');
+const clone = require('lodash/clone');
 
 describe('contractPoint utils', () => {
-  it('should convert latLone to contractPoint and vise versa', function () {
+  it('should convert latLon to contractPoint and vise versa', function () {
     const latLon = {lat: 10.1112223334, lon: 80.5556667778};
     const height = 11;
     const contractPointResult = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
@@ -30,4 +33,23 @@ describe('contractPoint utils', () => {
     const contourPointFromUtmResult = contractPoint.encodeFromUtm(utmFromContractPointResult);
     assert.equal(contourPointFromUtmResult, contractPointWithoutHeight);
   });
+
+  it('should calculate area correctly', function () {
+    const basePointLatLon = {lat: 10.111222333444, lon: 80.555666777888};
+
+    const basePointUtm = utm.fromLatLon(basePointLatLon.lat, basePointLatLon.lon);
+    const secondPointUtm = clone(basePointUtm);
+    secondPointUtm.x += 5;
+    const thirdPointUtm = clone(secondPointUtm);
+    thirdPointUtm.y += 5;
+    const fourthPointUtm = clone(thirdPointUtm);
+    fourthPointUtm.x -= 5;
+
+    const utmPoints = [basePointUtm, secondPointUtm, thirdPointUtm, fourthPointUtm];
+    const utmArea = Math.abs(utm.area(utmPoints));
+    assert.equal(utmArea, 25);
+
+    const contractPointArea = contractPoint.contourArea(utmPoints.map(contractPoint.encodeFromUtm));
+    assert.equal(utmArea, contractPointArea);
+  })
 });

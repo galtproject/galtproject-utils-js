@@ -1,20 +1,32 @@
 const common = require('./common');
+const BN = require("bn.js");
+const web3Utils = require('web3-utils');
 
 module.exports = class Utm {
   static area(polygon) {
-    let area = 0; // Accumulates area in the loop	
-    let j = polygon.length - 1; // The last vertex is the 'previous' one to the first	
-
-    let scaleSum = 0;
-    for (let i = 0; i < polygon.length; i++) {
-      area += (polygon[j].x + polygon[i].x) * (polygon[j].y - polygon[i].y);
-      scaleSum += polygon[i].scale;
-      j = i; // j is previous vertex to i	
+    function toBN(number) {
+      return new BN(web3Utils.toWei(number.toString(), 'ether').toString(10));
     }
+    let area = toBN(0); // Accumulates area in the loop
+    let j = polygon.length - 1; // The last vertex is the 'previous' one to the first
 
-    area = area / ((scaleSum / polygon.length) ** 2);
+    let scaleSum = toBN(0);
+    for (let i = 0; i < polygon.length; i++) {
+      const ixBn = toBN(polygon[i].x);
+      const iyBn = toBN(polygon[i].y);
 
-    return area / 2;
+      const jxBn = toBN(polygon[j].x);
+      const jyBn = toBN(polygon[j].y);
+
+      area = area.add(jxBn.add(ixBn).mul(jyBn.sub(iyBn)));
+      scaleSum = scaleSum.add(toBN(polygon[i].scale));
+      j = i; // j is previous vertex to i
+    }
+    const scaleSumDivLength = (scaleSum.mul(toBN(10 ** 18)).div(toBN(polygon.length))).div(toBN(1));
+
+    area = area.div(scaleSumDivLength.pow(new BN('2')));
+
+    return parseFloat((area).toString(10)) / 2;
   }
 
   static uncompress(compressedUtm) {
