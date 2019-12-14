@@ -65,11 +65,9 @@ module.exports = class ContractPoint {
   }
 
   static encodeFromXY(x, y, z = 0) {
-    console.log('z', z);
     x = web3Abi.decodeParameter('uint256', web3Abi.encodeParameter('int256', x));
     y = web3Abi.decodeParameter('uint256', web3Abi.encodeParameter('int256', y));
     z = web3Abi.decodeParameter('uint256', web3Abi.encodeParameter('int256', z));
-    console.log('z', z);
 
     y = (new BN(y));
     x = (new BN(x)).ishln(64);
