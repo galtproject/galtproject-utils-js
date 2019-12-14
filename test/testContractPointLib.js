@@ -29,6 +29,12 @@ describe('contractPoint utils', () => {
     const geohashFromLatLon = geohashExtra.encodeFromLatLng(latLon.lat, latLon.lon, 12);
     assert.equal(geohashFromContractPoint, geohashFromLatLon);
 
+    const contractPointFromGeohash = contractPoint.encodeFromGeohash(geohashFromContractPoint);
+    const latLonFromGeohash = contractPoint.decodeToLatLon(contractPointFromGeohash);
+
+    assert.equal(Math.round(latLonFromGeohash.lat * 10 ** 6) / 10 ** 6, Math.round(latLon.lat * 10 ** 6) / 10 ** 6);
+    assert.equal(Math.round(latLonFromGeohash.lon * 10 ** 6) / 10 ** 6, Math.round(latLon.lon * 10 ** 6) / 10 ** 6);
+
     const utmFromLatLonResult = utmLib.fromLatLon(latLon.lat, latLon.lon);
     const utmFromContractPointResult = contractPoint.decodeToUtm(contractPointResult);
     assert.deepEqual(utmFromLatLonResult, utmFromContractPointResult);
