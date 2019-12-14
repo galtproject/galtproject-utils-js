@@ -52,6 +52,24 @@ describe('contractPoint utils', () => {
     })
   });
 
+  it('should shift correctly', function () {
+    const baseContractPoint = '340282359897729907752972374757912920387';
+
+    [{dx: 5, dy: 0}, {dx: 0, dy: 5}, {dx: 5, dy: 5}, {dx: -5, dy: 0}, {dx: 0, dy: -5}, {dx: -5, dy: -5}, {dx: 5, dy: -5}, {dx: -5, dy: 5}].forEach((shiftMeters) => {
+      const resultContractPoint = contractPoint.shift(baseContractPoint, shiftMeters.dx, shiftMeters.dy);
+
+      console.log('resultContractPoint', resultContractPoint);
+      const basePointUtm = contractPoint.decodeToUtm(baseContractPoint);
+      const resultPointUtm = contractPoint.decodeToUtm(resultContractPoint);
+      assert.equal(roundToDecimal(basePointUtm.x + shiftMeters.dx), roundToDecimal(resultPointUtm.x));
+      assert.equal(roundToDecimal(basePointUtm.y + shiftMeters.dy), roundToDecimal(resultPointUtm.y));
+    });
+
+    function roundToDecimal(value, decimal = 4) {
+      return Math.round(value * 10 ** decimal) / 10 ** decimal;
+    }
+  });
+
   it('should calculate area correctly', function () {
     const basePointLatLon = {lat: 50.111222333444, lon: 80.555666777888};
 

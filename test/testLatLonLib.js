@@ -13,7 +13,7 @@ const latLonLib = require('../src/latLon');
 const assert = require('assert');
 
 describe('latLon utils', () => {
-  it('should calculate area correctly', function () {
+  it('should shift correctly', function () {
     const basePointLatLon = {lat: 50.111222333444, lon: 80.555666777888};
 
     [{dx: 5, dy: 0}, {dx: 0, dy: 5}, {dx: 5, dy: 5}, {dx: -5, dy: 0}, {dx: 0, dy: -5}, {dx: -5, dy: -5}, {dx: 5, dy: -5}, {dx: -5, dy: 5}].forEach((shiftMeters) => {
