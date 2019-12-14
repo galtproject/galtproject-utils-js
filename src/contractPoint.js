@@ -10,6 +10,7 @@
 const BN = require("bn.js");
 const web3Abi = require('web3-eth-abi');
 const Utm = require('./utm');
+const GeohashExtra = require('./geohashExtra');
 const LatLon = require('./latLon');
 
 const XYZ_MASK =         new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
@@ -99,5 +100,24 @@ module.exports = class ContractPoint {
     const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
     const resultLatLon = LatLon.shift(latLonHeight.lat, latLonHeight.lon, dx, dy);
     return ContractPoint.encodeFromLatLngHeight(resultLatLon.lat, resultLatLon.lon, latLonHeight.height);
+  }
+
+  static decodeToGeohash(contractPoint, precision = 12) {
+    const latLon = ContractPoint.decodeToLatLon(contractPoint, true);
+    return GeohashExtra.encodeFromLatLng(latLon.lat, latLon.lon, precision);
+  }
+
+  static encodeFromGeohash(geohash) {
+    const latLon = GeohashExtra.decodeToLatLon(geohash);
+    return ContractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
+  }
+
+  static isContractPoint(value) {
+    try {
+      const bn = (new BN(value.toString(10))).toString(16);
+      return bn.length === 26 || bn.replace(/^f+/g, '').length === 26 || bn.replace(/^([^0]+0+)/g, '').length === 26;
+    } catch (e) {
+      return false;
+    }
   }
 };
