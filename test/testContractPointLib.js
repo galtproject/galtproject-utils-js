@@ -108,6 +108,6 @@ describe('contractPoint utils', () => {
       const geohash5 = commonLib.geohashToGeohash5(geohash);
       const geohash5z = commonLib.geohash5ToGeohash5z('0', geohash5);
       assert.equal(contractPoint.isContractPoint(geohash5z), false);
-    })
+    });
   })
 });
