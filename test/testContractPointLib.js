@@ -9,6 +9,7 @@
 
 const contractPoint = require('../src/contractPoint');
 const utmLib = require('../src/utm');
+const commonLib = require('../src/common');
 const latLonLib = require('../src/latLon');
 const geohashExtra = require('../src/geohashExtra');
 const assert = require('assert');
@@ -100,5 +101,13 @@ describe('contractPoint utils', () => {
       const contractPointArea = contractPoint.contourArea(latLonPoints.map(l => contractPoint.encodeFromLatLng(l.lat, l.lon)));
       assert.equal(latLonArea, contractPointArea);
     });
+  });
+
+  it('should check isContractPoint correctly', function () {
+    ['dr72j3f7enwc'].forEach(geohash => {
+      const geohash5 = commonLib.geohashToGeohash5(geohash);
+      const geohash5z = commonLib.geohash5ToGeohash5z('0', geohash5);
+      assert.equal(contractPoint.isContractPoint(geohash5z), false);
+    })
   })
 });
