@@ -116,7 +116,8 @@ module.exports = class ContractPoint {
   static isContractPoint(value) {
     try {
       const bn = (new BN(value.toString(10))).toString(16);
-      return bn.length === 26 || bn.replace(/^f+/g, '').length === 26 || bn.replace(/^([^0]+0+)/g, '').length === 26;
+      // console.log('bn', bn, bn.replace(/^f+/g, ''), bn.replace(/^([^0]+0+)/g, ''));
+      return bn.length === 26 || bn.replace(/^f+/g, '').length === 26 || bn.replace(/^(.{0,8}0+)/g, '').length === 26;
     } catch (e) {
       return false;
     }
