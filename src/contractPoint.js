@@ -96,9 +96,9 @@ module.exports = class ContractPoint {
     return Math.round(area * 100) / 100;
   }
 
-  static shift(contractPoint, dx, dy) {
+  static shift(contractPoint, dx, dy, dangle = 0) {
     const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
-    const resultLatLon = LatLon.shift(latLonHeight.lat, latLonHeight.lon, dx, dy);
+    const resultLatLon = LatLon.shift(latLonHeight.lat, latLonHeight.lon, dx, dy, dangle);
     return ContractPoint.encodeFromLatLngHeight(resultLatLon.lat, resultLatLon.lon, latLonHeight.height);
   }
 
