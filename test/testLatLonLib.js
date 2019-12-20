@@ -16,13 +16,18 @@ describe('latLon utils', () => {
   it('should shift correctly', function () {
     const basePointLatLon = {lat: 50.111222333444, lon: 80.555666777888};
 
-    [{dx: 50, dy: 0}, {dx: 0, dy: 50}, {dx: 50, dy: 50}, {dx: -50, dy: 0}, {dx: 0, dy: -50}, {dx: -50, dy: -50}, {dx: 50, dy: -50}, {dx: -50, dy: 50}].forEach((shiftMeters) => {
+    [{dx: 5, dy: 0}, {dx: 0, dy: 5}, {dx: 5, dy: 5}, {dx: -5, dy: 0}, {dx: 0, dy: -5}, {dx: -5, dy: -5}, {dx: 5, dy: -5}, {dx: -5, dy: 5}].forEach((shiftMeters) => {
+      console.log('shift', shiftMeters);
       const resultPointLatLon = latLonLib.shift(basePointLatLon.lat, basePointLatLon.lon, shiftMeters.dx, shiftMeters.dy);
 
       const basePointUtm = utmLib.fromLatLon(basePointLatLon.lat, basePointLatLon.lon);
       const resultPointUtm = utmLib.fromLatLon(resultPointLatLon.lat, resultPointLatLon.lon);
       assert.equal(roundToDecimal(basePointUtm.x + shiftMeters.dx), roundToDecimal(resultPointUtm.x));
       assert.equal(roundToDecimal(basePointUtm.y + shiftMeters.dy), roundToDecimal(resultPointUtm.y));
+
+      const baseCalculatedPointLatLon = latLonLib.shift(resultPointLatLon.lat, resultPointLatLon.lon, shiftMeters.dx * -1, shiftMeters.dy * -1);
+      assert.equal(roundToDecimal(baseCalculatedPointLatLon.lon, 10), roundToDecimal(basePointLatLon.lon, 10));
+      assert.equal(roundToDecimal(baseCalculatedPointLatLon.lat, 10), roundToDecimal(basePointLatLon.lat, 10));
     });
 
     function roundToDecimal(value, decimal = 4) {
