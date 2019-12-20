@@ -16,7 +16,7 @@ describe('latLon utils', () => {
   it('should shift correctly', function () {
     const basePointLatLon = {lat: 50.111222333444, lon: 80.555666777888};
 
-    [{dx: 5, dy: 0}, {dx: 0, dy: 5}, {dx: 5, dy: 5}, {dx: -5, dy: 0}, {dx: 0, dy: -5}, {dx: -5, dy: -5}, {dx: 5, dy: -5}, {dx: -5, dy: 5}].forEach((shiftMeters) => {
+    [{dx: 50, dy: 0}, {dx: 0, dy: 50}, {dx: 50, dy: 50}, {dx: -50, dy: 0}, {dx: 0, dy: -50}, {dx: -50, dy: -50}, {dx: 50, dy: -50}, {dx: -50, dy: 50}].forEach((shiftMeters) => {
       const resultPointLatLon = latLonLib.shift(basePointLatLon.lat, basePointLatLon.lon, shiftMeters.dx, shiftMeters.dy);
 
       const basePointUtm = utmLib.fromLatLon(basePointLatLon.lat, basePointLatLon.lon);
