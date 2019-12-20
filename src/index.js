@@ -18,6 +18,6 @@ all.utm = utm;
 all.latLon = latLon;
 all.coordinates = coordinates;
 all.contractPoint = contractPoint;
-all.vecor = vector;
+all.vector = vector;
 
 module.exports = all;
