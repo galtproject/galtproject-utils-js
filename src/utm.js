@@ -28,7 +28,7 @@ module.exports = class Utm {
       j = i; // j is previous vertex to i
     }
 
-    scales = scales.map(s => (s * 10 ** 5).toFixed());
+    scales = scales.map(s => (s * 10 ** 5).toString().split('.')[0]);
 
     if(uniq(scales).length === 1) {
       // the same scales, no need to apply it
