@@ -8,15 +8,21 @@
  */
 
 const Utm = require('./utm');
+const Vector = require('./vector');
 const geolocationUtils = require('geolocation-utils');
 
 module.exports = class LatLon {
-  static shift(latitude, longitude, dx, dy) {
+  static shift(latitude, longitude, dx, dy, dangle = 0) {
     const utmPoint = Utm.fromLatLon(latitude, longitude);
-    utmPoint.x += dx;
-    utmPoint.y += dy;
 
-    const resultLatLon = Utm.toLatLon(utmPoint);
+    const vector = new Vector({
+      x: dx,
+      y: dy
+    });
+
+    vector.rotate(dangle);
+
+    const resultLatLon = Utm.toLatLon(vector.applyToUtm(utmPoint));
 
     // https://www.gislounge.com/how-to-calculate-the-boundaries-of-an-utm-zone/
     const zoneDegreeEast = (utmPoint.zone * 6) - 180;
@@ -29,6 +35,8 @@ module.exports = class LatLon {
     console.log('utm invalid');
     const angle = Math.atan2(dy, dx);   //radians
     let brng = 180*angle/Math.PI;  //degrees
+
+    brng += dangle;
 
     let dist = Math.sqrt(dx * dx + dy * dy) / 1000;
 
