@@ -54,4 +54,28 @@ module.exports = class LatLon {
       return Utm.fromLatLon(coors.lat, coors.lon);
     })));
   }
+
+  // https://github.com/substack/point-in-polygon
+  static isInside(point, polygon) {
+    let x;
+    let y;
+    let xi;
+    let xj;
+    let yi;
+    let yj;
+
+    x = point[0], y = point[1];
+
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      xi = polygon[i][0], yi = polygon[i][1];
+      xj = polygon[j][0], yj = polygon[j][1];
+
+      const intersect = ((yi > y) !== (yj > y))
+          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+
+    return inside;
+  }
 };
