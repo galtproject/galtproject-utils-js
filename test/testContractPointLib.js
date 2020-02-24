@@ -101,4 +101,39 @@ describe('contractPoint utils', () => {
       assert.equal(latLonArea, contractPointArea);
     });
   })
+
+  it('should detect intersection correctly', function () {
+    const firstCpointContour = [
+        [40.7562988228, -73.9653340837],
+        [40.7562193716, -73.9651486588],
+        [40.7560675629, -73.9652563551],
+        [40.756148433, -73.9654464625]
+    ].map(latLon => contractPoint.encodeFromLatLng(latLon[0], latLon[1]));
+
+    const secondCpointContour = [
+      [40.7562442001, -73.9653200364],
+      [40.7562080214, -73.9652011022],
+      [40.7561129637, -73.9652666565],
+      [40.7561690052, -73.9653912096]
+    ].map(latLon => contractPoint.encodeFromLatLng(latLon[0], latLon[1]));
+
+    assert.equal(contractPoint.intersects(secondCpointContour, firstCpointContour), true);
+    assert.equal(contractPoint.intersects(firstCpointContour, secondCpointContour), true);
+
+    assert.equal(contractPoint.contourInsideAnother(secondCpointContour, firstCpointContour), true);
+    assert.equal(contractPoint.contourInsideAnother(firstCpointContour, secondCpointContour), false);
+
+    const thirdCpointContour = [
+      [40.7562708166, -73.9648513109],
+      [40.7561975136, -73.9646732123],
+      [40.7560142559, -73.9648018963],
+      [40.7560914581, -73.9649830833]
+    ].map(latLon => contractPoint.encodeFromLatLng(latLon[0], latLon[1]));
+
+    assert.equal(contractPoint.contourInsideAnother(secondCpointContour, thirdCpointContour), false);
+    assert.equal(contractPoint.contourInsideAnother(thirdCpointContour, secondCpointContour), false);
+
+    assert.equal(contractPoint.intersects(secondCpointContour, thirdCpointContour), false);
+    assert.equal(contractPoint.intersects(firstCpointContour, thirdCpointContour), false);
+  })
 });

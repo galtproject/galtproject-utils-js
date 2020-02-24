@@ -12,6 +12,7 @@ const web3Abi = require('web3-eth-abi');
 const Utm = require('./utm');
 const GeohashExtra = require('./geohashExtra');
 const LatLon = require('./latLon');
+const martinezRueda = require('martinez-polygon-clipping');
 
 const XYZ_MASK =         new BN('00000000000000000000000ffffffffffffffffffffffffffffffffffffffff', 16);
 const XY_MASK =          new BN('0000000000000000000000000000000ffffffffffffffffffffffffffffffff', 16);
@@ -120,5 +121,49 @@ module.exports = class ContractPoint {
     } catch (e) {
       return false;
     }
+  }
+
+  /**
+   * Overlay operations with contours
+   * @param redContour
+   * @param blueContour
+   * @param operation
+   * @returns [geohash]
+   */
+  static overlay(redContour, blueContour, operation) {
+    const redPoints = redContour.map((cpoint) => ContractPoint.decodeToLatLon(cpoint, true));
+    redPoints.push(redPoints[0]);
+
+    const bluePoints = blueContour.map((cpoint) => ContractPoint.decodeToLatLon(cpoint, true));
+    bluePoints.push(bluePoints[0]);
+
+    const overlayResult = martinezRueda[operation]([ redPoints ], [ bluePoints ]);
+
+    let contour = [];
+    if(overlayResult && overlayResult[0] && overlayResult[0][0] && overlayResult[0][0].length) {
+      contour = overlayResult[0][0].map((point) => ContractPoint.encodeFromLatLng(point[0], point[1]));
+    }
+
+    contour.splice(-1, 1);
+
+    return {
+      result: overlayResult,
+      contour: contour,
+      sortedContour: contour
+    };
+  }
+
+  static intersects(contour1, contour2) {
+    const overlayResult = ContractPoint.overlay(contour1, contour2, "intersection").result;
+    return !!(overlayResult && overlayResult[0] && overlayResult[0].length === 1);
+  }
+
+  static isContractPointInside(cpoint, contour) {
+    const latLon = ContractPoint.decodeToLatLon(cpoint);
+    return LatLon.isInside([latLon.lat, latLon.lon], contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+  }
+
+  static contourInsideAnother(contour1, contour2) {
+    return contour1.filter(c => ContractPoint.isContractPointInside(c, contour2)).length === contour1.length;
   }
 };

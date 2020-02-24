@@ -10,6 +10,7 @@ const Geohash = require('./geohash');
 const GeohashExtra = require('./geohashExtra');
 const Coordinates = require('./coordinates');
 const Utm = require('./utm');
+const LatLon = require('./latLon');
 const martinezRueda = require('martinez-polygon-clipping');
 
 module.exports = class GeohashContour {
@@ -373,7 +374,7 @@ module.exports = class GeohashContour {
     static isGeohashInside(geohash, latLngPolygon, strict = true) {
         if(!strict) {
             const latLon = GeohashExtra.decodeToLatLon(geohash);
-            return GeohashContour.isInside([latLon.lat, latLon.lon], latLngPolygon);
+            return LatLon.isInside([latLon.lat, latLon.lon], latLngPolygon);
         }
         const neChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'ne'), 'ne');
         const seChild = Geohash.getChildByDirection(Geohash.getChildByDirection(geohash, 'se'), 'se');
@@ -385,12 +386,11 @@ module.exports = class GeohashContour {
         const nwCoor = GeohashExtra.decodeToLatLon(nwChild);
         const swCoor = GeohashExtra.decodeToLatLon(swChild);
 
-        return GeohashContour.isInside([neCoor.lat, neCoor.lon], latLngPolygon)
-            && GeohashContour.isInside([seCoor.lat, seCoor.lon], latLngPolygon)
-            && GeohashContour.isInside([nwCoor.lat, nwCoor.lon], latLngPolygon)
-            && GeohashContour.isInside([swCoor.lat, swCoor.lon], latLngPolygon);
+        return LatLon.isInside([neCoor.lat, neCoor.lon], latLngPolygon)
+            && LatLon.isInside([seCoor.lat, seCoor.lon], latLngPolygon)
+            && LatLon.isInside([nwCoor.lat, nwCoor.lon], latLngPolygon)
+            && LatLon.isInside([swCoor.lat, swCoor.lon], latLngPolygon);
     }
-
 
     static isGeohashInsideContour(geohash, contour, strict = true) {
         const polygon = contour.map((geohash) => {
@@ -406,30 +406,6 @@ module.exports = class GeohashContour {
         const point2 = GeohashExtra.decodeToLatLon(geohash2);
 
         return GeohashExtra.encodeFromLatLng((point1.lat + point2.lat) / 2, (point1.lon + point2.lon) / 2, geohash1.length);
-    }
-
-    // https://github.com/substack/point-in-polygon
-    static isInside(point, polygon) {
-        let x;
-        let y;
-        let xi;
-        let xj;
-        let yi;
-        let yj;
-
-        x = point[0], y = point[1];
-
-        let inside = false;
-        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-            xi = polygon[i][0], yi = polygon[i][1];
-            xj = polygon[j][0], yj = polygon[j][1];
-
-            const intersect = ((yi > y) !== (yj > y))
-                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-            if (intersect) inside = !inside;
-        }
-
-        return inside;
     }
     
     static intersectsGeohashesLines(geohash1Line1, geohash2Line1, geohash1Line2, geohash2Line2){
