@@ -23,7 +23,7 @@ describe('utm utils', () => {
       return utmUtils.fromLatLon(latLon[0], latLon[1]);
     });
 
-    assert.equal(utmUtils.area(utmContor), -6841437.324010665);
+    assert.equal(utmUtils.area(utmContor), -6836445.673651415);
   });
 
   it('should correctly uncompress', function () {
