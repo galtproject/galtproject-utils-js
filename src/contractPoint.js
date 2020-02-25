@@ -64,7 +64,7 @@ module.exports = class ContractPoint {
   }
 
   static encodeFromLatLngHeight(lat, lon, height = 0) {
-    return ContractPoint.encodeFromXY(Math.round(lat * 10 ** 10), Math.round(lon * 10 ** 10), height).toString(10);
+    return ContractPoint.encodeFromXY(Math.round(lat * 10 ** 10), Math.round(lon * 10 ** 10), height * 100).toString(10);
   }
 
   static encodeFromXY(x, y, z = 0) {
