@@ -70,4 +70,29 @@ module.exports = class LatLon {
 
     return inside;
   }
+
+  // https://stackoverflow.com/a/24392281/6053486
+  static intersectsLines(point1Line1, point2Line1, point1Line2, point2Line2) {
+    const a = point1Line1[0],
+        b = point1Line1[1];
+
+    const c = point2Line1[0],
+        d = point2Line1[1];
+
+    const p = point1Line2[0],
+        q = point1Line2[1];
+
+    const r = point2Line2[0],
+        s = point2Line2[1];
+
+    let det, gamma, lambda;
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+      return false;
+    } else {
+      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+      return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+    }
+  };
 };
