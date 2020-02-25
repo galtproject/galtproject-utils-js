@@ -25,7 +25,7 @@ module.exports = class ContractPoint {
   static decodeToLatLonHeight(contractPoint) {
     const xyResult = ContractPoint.decodeToXY(contractPoint);
     return {
-      height: xyResult.z / 10 ** 10,
+      height: xyResult.z / 100,
       lat: xyResult.x / 10 ** 10,
       lon: xyResult.y / 10 ** 10
     };
