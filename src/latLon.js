@@ -79,7 +79,7 @@ module.exports = class LatLon {
   static pointOnSegment(point, sp1, sp2) {
     const POS_EPS = 0.0000001;
     // compare versus epsilon for floating point values, or != 0 if using integers
-    if (MathUtils.abs((point[1] - sp1[1]) * (sp2[0] - sp1[0]) - (point[0] - sp1[0]) * (sp2[1] - sp1[1])) > POS_EPS) {
+    if (Math.abs((point[1] - sp1[1]) * (sp2[0] - sp1[0]) - (point[0] - sp1[0]) * (sp2[1] - sp1[1])) > POS_EPS) {
       return false;
     }
 
