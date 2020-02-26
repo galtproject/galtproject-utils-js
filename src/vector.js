@@ -15,10 +15,10 @@ module.exports = class Vector {
     this.y = data.y;
   }
 
-  rotate(x, y, angle) {
+  rotate(x, y, radians) {
     let cx = 0,
         cy = 0,
-        radians = (Math.PI / 180) * angle,
+        // radians = (Math.PI / 180) * angle,
         cos = Math.cos(radians),
         sin = Math.sin(radians),
         nx = (cos * (this.x - cx)) + (sin * (this.y - cy)) + cx,
