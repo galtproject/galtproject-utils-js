@@ -18,7 +18,7 @@ describe('contractPoint utils', () => {
     const latLon = {lat: 10.1112223334, lon: 80.5556667778};
     const height = 11;
     const contractPointResult = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
-    assert.equal(contractPointResult, '3743106037995514404663181823400999601538');
+    assert.equal(contractPointResult, '374310603614897501116278129316596581877122');
     assert.equal(contractPoint.isContractPoint(contractPointResult), true);
     const decoded = contractPoint.decodeToLatLonHeight(contractPointResult);
     assert.equal(latLon.lat, decoded.lat);
@@ -50,6 +50,14 @@ describe('contractPoint utils', () => {
     assert.equal(latLon.lat, latLonHeight.lat);
     assert.equal(latLon.lon, latLonHeight.lon);
     assert.equal(latLonHeight.height, 0);
+
+    const anotherCPoint = '3504908379293184276105216900222897518066954';
+    const anotherDecoded = contractPoint.decodeToLatLonHeight(anotherCPoint, true);
+    assert.equal(anotherDecoded.lat,  40.7557149511);
+    assert.equal(anotherDecoded.lon, -73.9653141238);
+
+    const anotherEncoded = contractPoint.encodeFromLatLngHeight(anotherDecoded.lat, anotherDecoded.lon, anotherDecoded.height);
+    assert.equal(anotherEncoded, anotherCPoint);
   });
 
   it('should convert negative latLon to contractPoint and vise versa', function () {
