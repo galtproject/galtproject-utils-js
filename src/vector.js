@@ -15,9 +15,14 @@ module.exports = class Vector {
     this.y = data.y;
   }
 
-  rotate(angle) {
-    const nx = (this.x * Math.cos(angle)) - (this.y * Math.sin(angle));
-    const ny = (this.x * Math.sin(angle)) + (this.y * Math.cos(angle));
+  rotate(x, y, angle) {
+    let cx = 0,
+        cy = 0,
+        radians = (Math.PI / 180) * angle,
+        cos = Math.cos(radians),
+        sin = Math.sin(radians),
+        nx = (cos * (this.x - cx)) + (sin * (this.y - cy)) + cx,
+        ny = (cos * (this.y - cy)) - (sin * (this.x - cx)) + cy;
 
     this.x = nx;
     this.y = ny;
