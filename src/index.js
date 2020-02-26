@@ -15,7 +15,6 @@ const geohashExtra = require("./geohashExtra.js");
 const contractPoint = require("./contractPoint.js");
 
 const utm = require("./utm.js");
-const latLon = require("./latLon.js");
 const coordinates = require("./coordinates.js");
 const vector = require("./vector.js");
 
