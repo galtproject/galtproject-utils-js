@@ -97,9 +97,9 @@ module.exports = class ContractPoint {
     return Math.round(area * 100) / 100;
   }
 
-  static shift(contractPoint, dx, dy) {
+  static shift(contractPoint, dx, dy, dangle = 0) {
     const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
-    const resultLatLon = LatLon.shift(latLonHeight.lat, latLonHeight.lon, dx, dy);
+    const resultLatLon = LatLon.shift(latLonHeight.lat, latLonHeight.lon, dx, dy, dangle);
     return ContractPoint.encodeFromLatLngHeight(resultLatLon.lat, resultLatLon.lon, latLonHeight.height);
   }
 
@@ -117,7 +117,8 @@ module.exports = class ContractPoint {
   static isContractPoint(value) {
     try {
       const bn = (new BN(value.toString(10))).toString(16);
-      return bn.length === 26 || bn.replace(/^f+/g, '').length === 26 || bn.replace(/^([^0]+0+)/g, '').length === 26;
+      // console.log('bn', bn, bn.replace(/^f+/g, ''), bn.replace(/^([^0]+0+)/g, ''));
+      return bn.length === 26 || bn.replace(/^f+/g, '').length === 26 || bn.replace(/^(.{0,8}0+)/g, '').length === 26;
     } catch (e) {
       return false;
     }
