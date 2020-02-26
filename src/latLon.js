@@ -48,7 +48,7 @@ module.exports = class LatLon {
   }
 
   // https://github.com/substack/point-in-polygon
-  static isInside(point, polygon) {
+  static isInside(point, polygon, excludeCollinear = false) {
     let x;
     let y;
     let xi;
@@ -63,12 +63,37 @@ module.exports = class LatLon {
       xi = polygon[i][0], yi = polygon[i][1];
       xj = polygon[j][0], yj = polygon[j][1];
 
+      if(excludeCollinear) {
+
+      }
+
       const intersect = ((yi > y) !== (yj > y))
           && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
       if (intersect) inside = !inside;
     }
 
     return inside;
+  }
+
+
+  static pointOnSegment(point, sp1, sp2) {
+    const POS_EPS = 0.0000001;
+    // compare versus epsilon for floating point values, or != 0 if using integers
+    if (MathUtils.abs((point[1] - sp1[1]) * (sp2[0] - sp1[0]) - (point[0] - sp1[0]) * (sp2[1] - sp1[1])) > POS_EPS) {
+      return false;
+    }
+
+    let dotproduct = (point[0] - sp1[0]) * (sp2[0] - sp1[0]) + (point[1] - sp1[1]) * (sp2[1] - sp1[1]);
+    if (dotproduct < 0) {
+      return false;
+    }
+
+    let squaredlengthba = (sp2[0] - sp1[0]) * (sp2[0] - sp1[0]) + (sp2[1] - sp1[1]) * (sp2[1] - sp1[1]);
+    if (dotproduct > squaredlengthba) {
+      return false;
+    }
+
+    return true;
   }
 
   // https://stackoverflow.com/a/24392281/6053486
