@@ -165,13 +165,13 @@ module.exports = class ContractPoint {
     return !!(overlayResult && overlayResult[0] && overlayResult[0].length === 1);
   }
 
-  static isContractPointInside(cpoint, contour) {
+  static isContractPointInside(cpoint, contour, excludeCollinear = false) {
     const latLon = ContractPoint.decodeToLatLon(cpoint);
-    return LatLon.isInside([latLon.lat, latLon.lon], contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+    return LatLon.isInside([latLon.lat, latLon.lon], contour.map(c => ContractPoint.decodeToLatLon(c, true)), excludeCollinear);
   }
 
-  static contourInsideAnother(contour1, contour2) {
-    return contour1.filter(c => ContractPoint.isContractPointInside(c, contour2)).length === contour1.length;
+  static contourInsideAnother(contour1, contour2, excludeCollinear = false) {
+    return contour1.filter(c => ContractPoint.isContractPointInside(c, contour2, excludeCollinear)).length === contour1.length;
   }
 
   static intersectsLines(cpoint1Line1, cpoint2Line1, cpoint1Line2, cpoint2Line2){
