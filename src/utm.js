@@ -51,6 +51,11 @@ module.exports = class Utm {
     return parseFloat((area / 10 ** 18).toString(10)) / 2;
   }
 
+  static getAngle(point1, point2, degree = false) {
+    let angle = Math.atan2(point2.y - point1.y, point2.x - point1.x);
+    return degree ? angle.toDegrees() : angle;
+  }
+
   static uncompress(compressedUtm) {
     const mgrsLatBands = 'CDEFGHJKLMNPQRSTUVWXX';
 

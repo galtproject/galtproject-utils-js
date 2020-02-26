@@ -21,8 +21,8 @@ module.exports = class Vector {
         // radians = (Math.PI / 180) * angle,
         cos = Math.cos(radians),
         sin = Math.sin(radians),
-        nx = (cos * (this.x - cx)) + (sin * (this.y - cy)) + cx,
-        ny = (cos * (this.y - cy)) - (sin * (this.x - cx)) + cy;
+        nx = (cos * (this.x - cx)) - (sin * (this.y - cy)) + cx,
+        ny = (cos * (this.y - cy)) + (sin * (this.x - cx)) + cy;
 
     this.x = nx;
     this.y = ny;

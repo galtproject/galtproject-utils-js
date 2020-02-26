@@ -9,6 +9,7 @@
 
 const contractPoint = require('../src/contractPoint');
 const utmLib = require('../src/utm');
+const vectorLib = require('../src/vector');
 const commonLib = require('../src/common');
 const latLonLib = require('../src/latLon');
 const geohashExtra = require('../src/geohashExtra');
@@ -84,8 +85,16 @@ describe('contractPoint utils', () => {
 
       const basePointUtm = contractPoint.decodeToUtm(baseContractPoint);
       const resultPointUtm = contractPoint.decodeToUtm(resultContractPoint);
+
       assert.equal(roundToDecimal(basePointUtm.x + shiftMeters.dx), roundToDecimal(resultPointUtm.x));
       assert.equal(roundToDecimal(basePointUtm.y + shiftMeters.dy), roundToDecimal(resultPointUtm.y));
+
+      if(!shiftMeters.dx || !shiftMeters.dy) {
+        const angle = contractPoint.getAngle(baseContractPoint, resultContractPoint);
+        const resultPointUtmByAngle = contractPoint.decodeToUtm(contractPoint.shift(baseContractPoint, 5, 0, angle));
+        assert.equal(roundToDecimal(resultPointUtmByAngle.x), roundToDecimal(resultPointUtm.x));
+        assert.equal(roundToDecimal(resultPointUtmByAngle.y), roundToDecimal(resultPointUtm.y));
+      }
     });
 
     function roundToDecimal(value, decimal = 4) {
