@@ -174,12 +174,13 @@ module.exports = class ContractPoint {
     return contour1.filter(c => ContractPoint.isContractPointInside(c, contour2, excludeCollinear)).length === contour1.length;
   }
 
-  static intersectsLines(cpoint1Line1, cpoint2Line1, cpoint1Line2, cpoint2Line2){
+  static intersectsLines(cpoint1Line1, cpoint2Line1, cpoint1Line2, cpoint2Line2, excludeCollinear = false){
     return LatLon.intersectsLines(
         ContractPoint.decodeToLatLon(cpoint1Line1, true),
         ContractPoint.decodeToLatLon(cpoint2Line1, true),
         ContractPoint.decodeToLatLon(cpoint1Line2, true),
-        ContractPoint.decodeToLatLon(cpoint2Line2, true)
+        ContractPoint.decodeToLatLon(cpoint2Line2, true),
+        excludeCollinear
     );
   }
 

@@ -106,7 +106,17 @@ module.exports = class LatLon {
   }
 
   // https://stackoverflow.com/a/24392281/6053486
-  static intersectsLines(point1Line1, point2Line1, point1Line2, point2Line2) {
+  static intersectsLines(point1Line1, point2Line1, point1Line2, point2Line2, excludeCollinear = false) {
+    if(excludeCollinear) {
+      if(
+          LatLon.pointOnSegment(point1Line1, point1Line2, point2Line2) ||
+          LatLon.pointOnSegment(point2Line1, point1Line2, point2Line2) ||
+          LatLon.pointOnSegment(point1Line2, point1Line1, point2Line1) ||
+          LatLon.pointOnSegment(point2Line2, point1Line1, point2Line1)
+      ) {
+        return false
+      }
+    }
     const a = point1Line1[0],
         b = point1Line1[1];
 
