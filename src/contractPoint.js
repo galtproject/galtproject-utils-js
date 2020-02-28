@@ -189,4 +189,12 @@ module.exports = class ContractPoint {
     const latLonCenter = Coordinates.polygonCenter(contour.map(c => ContractPoint.decodeToLatLon(c, true)));
     return ContractPoint.encodeFromLatLng(latLonCenter[0], latLonCenter[1]);
   }
+
+  static pointOnSegment(point, sp1, sp2) {
+    return LatLon.pointOnSegment(
+        ContractPoint.decodeToLatLon(point, true),
+        ContractPoint.decodeToLatLon(sp1, true),
+        ContractPoint.decodeToLatLon(sp2, true)
+    )
+  }
 };
