@@ -186,6 +186,7 @@ module.exports = class ContractPoint {
   }
 
   static polygonCenter(contour) {
-    return Coordinates.polygonCenter(contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+    const latLonCenter = Coordinates.polygonCenter(contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+    return ContractPoint.encodeFromLatLng(latLonCenter[0], latLonCenter[1]);
   }
 };
