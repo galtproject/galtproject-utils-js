@@ -24,6 +24,9 @@ const LON_MASK =         new BN('00000000000000000000000000000000000000000000000
 module.exports = class ContractPoint {
 
   static decodeToLatLonHeight(contractPoint) {
+    if(!contractPoint) {
+      return null;
+    }
     const xyResult = ContractPoint.decodeToXY(contractPoint);
     return {
       height: xyResult.z / 100,
@@ -33,6 +36,9 @@ module.exports = class ContractPoint {
   }
 
   static decodeToLatLon(contractPoint, arrayMode = false) {
+    if(!contractPoint) {
+      return null;
+    }
     const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
     if (arrayMode) {
       return [latLonHeight.lat, latLonHeight.lon];
@@ -42,6 +48,9 @@ module.exports = class ContractPoint {
   }
 
   static decodeToXY(contractPoint) {
+    if(!contractPoint) {
+      return null;
+    }
     contractPoint = new BN(contractPoint);
 
     const z = contractPoint.and(HEIGHT_MASK).shrn(64 * 2);
@@ -81,6 +90,9 @@ module.exports = class ContractPoint {
   }
 
   static decodeToUtm(contractPoint) {
+    if(!contractPoint) {
+      return null;
+    }
     const latLon = ContractPoint.decodeToLatLon(contractPoint, true);
     return Utm.fromLatLon(latLon[0], latLon[1]);
   }
