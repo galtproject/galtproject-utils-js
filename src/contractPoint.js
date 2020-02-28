@@ -11,6 +11,7 @@ const BN = require("bn.js");
 const web3Abi = require('web3-eth-abi');
 const Utm = require('./utm');
 const GeohashExtra = require('./geohashExtra');
+const Coordinates = require('./coordinates');
 const LatLon = require('./latLon');
 const martinezRueda = require('martinez-polygon-clipping');
 
@@ -184,4 +185,7 @@ module.exports = class ContractPoint {
     );
   }
 
+  static polygonCenter(contour) {
+    return Coordinates.polygonCenter(contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+  }
 };
