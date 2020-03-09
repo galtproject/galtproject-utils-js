@@ -11,6 +11,7 @@ const BN = require("bn.js");
 const web3Abi = require('web3-eth-abi');
 const Utm = require('./utm');
 const GeohashExtra = require('./geohashExtra');
+const Coordinates = require('./coordinates');
 const LatLon = require('./latLon');
 const martinezRueda = require('martinez-polygon-clipping');
 
@@ -23,15 +24,21 @@ const LON_MASK =         new BN('00000000000000000000000000000000000000000000000
 module.exports = class ContractPoint {
 
   static decodeToLatLonHeight(contractPoint) {
+    if(!contractPoint) {
+      return null;
+    }
     const xyResult = ContractPoint.decodeToXY(contractPoint);
     return {
-      height: xyResult.z,
+      height: xyResult.z / 100,
       lat: xyResult.x / 10 ** 10,
       lon: xyResult.y / 10 ** 10
     };
   }
 
   static decodeToLatLon(contractPoint, arrayMode = false) {
+    if(!contractPoint) {
+      return null;
+    }
     const latLonHeight = ContractPoint.decodeToLatLonHeight(contractPoint);
     if (arrayMode) {
       return [latLonHeight.lat, latLonHeight.lon];
@@ -41,6 +48,9 @@ module.exports = class ContractPoint {
   }
 
   static decodeToXY(contractPoint) {
+    if(!contractPoint) {
+      return null;
+    }
     contractPoint = new BN(contractPoint);
 
     const z = contractPoint.and(HEIGHT_MASK).shrn(64 * 2);
@@ -64,7 +74,7 @@ module.exports = class ContractPoint {
   }
 
   static encodeFromLatLngHeight(lat, lon, height = 0) {
-    return ContractPoint.encodeFromXY(Math.round(lat * 10 ** 10), Math.round(lon * 10 ** 10), height).toString(10);
+    return ContractPoint.encodeFromXY(Math.round(lat * 10 ** 10), Math.round(lon * 10 ** 10), height * 100).toString(10);
   }
 
   static encodeFromXY(x, y, z = 0) {
@@ -80,6 +90,9 @@ module.exports = class ContractPoint {
   }
 
   static decodeToUtm(contractPoint) {
+    if(!contractPoint) {
+      return null;
+    }
     const latLon = ContractPoint.decodeToLatLon(contractPoint, true);
     return Utm.fromLatLon(latLon[0], latLon[1]);
   }
@@ -87,6 +100,12 @@ module.exports = class ContractPoint {
   static encodeFromUtm(utm) {
     const latLon = Utm.toLatLon(utm);
     return ContractPoint.encodeFromLatLng(latLon.lat, latLon.lon);
+  }
+
+  static getAngle (point1, point2, degree = false) {
+    const utmPoint1 = this.decodeToUtm(point1);
+    const utmPoint2 = this.decodeToUtm(point2);
+    return Utm.getAngle(utmPoint1, utmPoint2, degree);
   }
 
   static contourArea(contour) {
@@ -159,12 +178,35 @@ module.exports = class ContractPoint {
     return !!(overlayResult && overlayResult[0] && overlayResult[0].length === 1);
   }
 
-  static isContractPointInside(cpoint, contour) {
+  static isContractPointInside(cpoint, contour, excludeCollinear = false) {
     const latLon = ContractPoint.decodeToLatLon(cpoint);
-    return LatLon.isInside([latLon.lat, latLon.lon], contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+    return LatLon.isInside([latLon.lat, latLon.lon], contour.map(c => ContractPoint.decodeToLatLon(c, true)), excludeCollinear);
   }
 
-  static contourInsideAnother(contour1, contour2) {
-    return contour1.filter(c => ContractPoint.isContractPointInside(c, contour2)).length === contour1.length;
+  static contourInsideAnother(contour1, contour2, excludeCollinear = false) {
+    return contour1.filter(c => ContractPoint.isContractPointInside(c, contour2, excludeCollinear)).length === contour1.length;
+  }
+
+  static intersectsLines(cpoint1Line1, cpoint2Line1, cpoint1Line2, cpoint2Line2, excludeCollinear = false){
+    return LatLon.intersectsLines(
+        ContractPoint.decodeToLatLon(cpoint1Line1, true),
+        ContractPoint.decodeToLatLon(cpoint2Line1, true),
+        ContractPoint.decodeToLatLon(cpoint1Line2, true),
+        ContractPoint.decodeToLatLon(cpoint2Line2, true),
+        excludeCollinear
+    );
+  }
+
+  static polygonCenter(contour) {
+    const latLonCenter = Coordinates.polygonCenter(contour.map(c => ContractPoint.decodeToLatLon(c, true)));
+    return ContractPoint.encodeFromLatLng(latLonCenter[0], latLonCenter[1]);
+  }
+
+  static pointOnSegment(point, sp1, sp2) {
+    return LatLon.pointOnSegment(
+        ContractPoint.decodeToLatLon(point, true),
+        ContractPoint.decodeToLatLon(sp1, true),
+        ContractPoint.decodeToLatLon(sp2, true)
+    )
   }
 };

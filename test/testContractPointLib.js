@@ -9,6 +9,7 @@
 
 const contractPoint = require('../src/contractPoint');
 const utmLib = require('../src/utm');
+const vectorLib = require('../src/vector');
 const commonLib = require('../src/common');
 const latLonLib = require('../src/latLon');
 const geohashExtra = require('../src/geohashExtra');
@@ -19,7 +20,7 @@ describe('contractPoint utils', () => {
     const latLon = {lat: 10.1112223334, lon: 80.5556667778};
     const height = 11;
     const contractPointResult = contractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, height);
-    assert.equal(contractPointResult, '3743106037995514404663181823400999601538');
+    assert.equal(contractPointResult, '374310603614897501116278129316596581877122');
     assert.equal(contractPoint.isContractPoint(contractPointResult), true);
     const decoded = contractPoint.decodeToLatLonHeight(contractPointResult);
     assert.equal(latLon.lat, decoded.lat);
@@ -51,6 +52,14 @@ describe('contractPoint utils', () => {
     assert.equal(latLon.lat, latLonHeight.lat);
     assert.equal(latLon.lon, latLonHeight.lon);
     assert.equal(latLonHeight.height, 0);
+
+    const anotherCPoint = '3504908379293184276105216900222897518066954';
+    const anotherDecoded = contractPoint.decodeToLatLonHeight(anotherCPoint, true);
+    assert.equal(anotherDecoded.lat,  40.7557149511);
+    assert.equal(anotherDecoded.lon, -73.9653141238);
+
+    const anotherEncoded = contractPoint.encodeFromLatLngHeight(anotherDecoded.lat, anotherDecoded.lon, anotherDecoded.height);
+    assert.equal(anotherEncoded, anotherCPoint);
   });
 
   it('should convert negative latLon to contractPoint and vise versa', function () {
@@ -76,8 +85,16 @@ describe('contractPoint utils', () => {
 
       const basePointUtm = contractPoint.decodeToUtm(baseContractPoint);
       const resultPointUtm = contractPoint.decodeToUtm(resultContractPoint);
+
       assert.equal(roundToDecimal(basePointUtm.x + shiftMeters.dx), roundToDecimal(resultPointUtm.x));
       assert.equal(roundToDecimal(basePointUtm.y + shiftMeters.dy), roundToDecimal(resultPointUtm.y));
+
+      if(!shiftMeters.dx || !shiftMeters.dy) {
+        const angle = contractPoint.getAngle(baseContractPoint, resultContractPoint);
+        const resultPointUtmByAngle = contractPoint.decodeToUtm(contractPoint.shift(baseContractPoint, 5, 0, angle));
+        assert.equal(roundToDecimal(resultPointUtmByAngle.x), roundToDecimal(resultPointUtm.x));
+        assert.equal(roundToDecimal(resultPointUtmByAngle.y), roundToDecimal(resultPointUtm.y));
+      }
     });
 
     function roundToDecimal(value, decimal = 4) {
@@ -103,7 +120,7 @@ describe('contractPoint utils', () => {
     });
   });
 
-  it('should check isContractPoint correctly', function () {
+  it.only('should check isContractPoint correctly', function () {
     ['dr72j3f7enwc'].forEach(geohash => {
       const geohash5 = commonLib.geohashToGeohash5(geohash);
       const geohash5z = commonLib.geohash5ToGeohash5z('0', geohash5);
@@ -148,5 +165,31 @@ describe('contractPoint utils', () => {
 
     assert.equal(contractPoint.intersects(secondCpointContour, thirdCpointContour), false);
     assert.equal(contractPoint.intersects(firstCpointContour, thirdCpointContour), false);
-  })
+
+
+    const collinearContour1 = [
+      '3504908379293184277775089960751380970484929',
+      '3504908379293184267663027581401573803463709',
+      '3504908379293184275610438330677859925195924',
+      '3504908379293184272425294371702652776185295',
+      '3504908379293184279042971574425585869879316',
+      '3504908379293184291505241382486358460634246'
+    ];
+    const collinearContour2 = [
+      '3504908379293184276105216900222897518066954',
+      '3504908379293184272425294371702652776185295',
+      '3504908379293184275610438330677859925195924',
+      '3504908379293184265220051476743923045052113',
+      '3504908379293184244717583796716105286622206',
+      '3504908379293184247067791225427070709953585',
+      '3504908379293184236739256304372281954668313',
+      '3504908379293184244006351132210159812812507',
+      '3504908379293184253809172293908300056543103',
+      '3504908379293184256283083588377561732987908',
+      '3504908379293184266518849833485665153149377',
+      '3504908379293184267199165754924073416653579'
+    ];
+    assert.equal(contractPoint.contourInsideAnother(collinearContour1, collinearContour2, true), false);
+    assert.equal(contractPoint.contourInsideAnother(collinearContour1, collinearContour2, false), true);
+  });
 });

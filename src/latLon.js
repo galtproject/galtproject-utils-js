@@ -56,7 +56,7 @@ module.exports = class LatLon {
   }
 
   // https://github.com/substack/point-in-polygon
-  static isInside(point, polygon) {
+  static isInside(point, polygon, excludeCollinear = false) {
     let x;
     let y;
     let xi;
@@ -71,6 +71,12 @@ module.exports = class LatLon {
       xi = polygon[i][0], yi = polygon[i][1];
       xj = polygon[j][0], yj = polygon[j][1];
 
+      if(excludeCollinear) {
+        if(LatLon.pointOnSegment(point, polygon[i], polygon[j])) {
+          return false;
+        }
+      }
+
       const intersect = ((yi > y) !== (yj > y))
           && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
       if (intersect) inside = !inside;
@@ -78,4 +84,59 @@ module.exports = class LatLon {
 
     return inside;
   }
+
+  static pointOnSegment(point, sp1, sp2) {
+    const POS_EPS = 2e-11;
+    // compare versus epsilon for floating point values, or != 0 if using integers
+    if (Math.abs((point[1] - sp1[1]) * (sp2[0] - sp1[0]) - (point[0] - sp1[0]) * (sp2[1] - sp1[1])) > POS_EPS) {
+      return false;
+    }
+
+    let dotproduct = (point[0] - sp1[0]) * (sp2[0] - sp1[0]) + (point[1] - sp1[1]) * (sp2[1] - sp1[1]);
+    if (dotproduct < 0) {
+      return false;
+    }
+
+    let squaredlengthba = (sp2[0] - sp1[0]) * (sp2[0] - sp1[0]) + (sp2[1] - sp1[1]) * (sp2[1] - sp1[1]);
+    if (dotproduct > squaredlengthba) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // https://stackoverflow.com/a/24392281/6053486
+  static intersectsLines(point1Line1, point2Line1, point1Line2, point2Line2, excludeCollinear = false) {
+    if(excludeCollinear) {
+      if(
+          LatLon.pointOnSegment(point1Line1, point1Line2, point2Line2) ||
+          LatLon.pointOnSegment(point2Line1, point1Line2, point2Line2) ||
+          LatLon.pointOnSegment(point1Line2, point1Line1, point2Line1) ||
+          LatLon.pointOnSegment(point2Line2, point1Line1, point2Line1)
+      ) {
+        return false
+      }
+    }
+    const a = point1Line1[0],
+        b = point1Line1[1];
+
+    const c = point2Line1[0],
+        d = point2Line1[1];
+
+    const p = point1Line2[0],
+        q = point1Line2[1];
+
+    const r = point2Line2[0],
+        s = point2Line2[1];
+
+    let det, gamma, lambda;
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+      return false;
+    } else {
+      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+      return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+    }
+  };
 };
