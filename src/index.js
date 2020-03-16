@@ -13,6 +13,7 @@ const latLon = require("./latLon.js");
 const geohashContour = require("./geohashContour.js");
 const geohashExtra = require("./geohashExtra.js");
 const contractPoint = require("./contractPoint.js");
+const tokenData = require("./tokenData.js");
 
 const utm = require("./utm.js");
 const coordinates = require("./coordinates.js");
@@ -28,6 +29,7 @@ all.utm = utm;
 all.latLon = latLon;
 all.coordinates = coordinates;
 all.contractPoint = contractPoint;
+all.tokenData = tokenData;
 all.vector = vector;
 
 module.exports = all;
