@@ -120,7 +120,7 @@ describe('contractPoint utils', () => {
     });
   });
 
-  it.only('should check isContractPoint correctly', function () {
+  it('should check isContractPoint correctly', function () {
     ['dr72j3f7enwc'].forEach(geohash => {
       const geohash5 = commonLib.geohashToGeohash5(geohash);
       const geohash5z = commonLib.geohash5ToGeohash5z('0', geohash5);
@@ -166,7 +166,6 @@ describe('contractPoint utils', () => {
     assert.equal(contractPoint.intersects(secondCpointContour, thirdCpointContour), false);
     assert.equal(contractPoint.intersects(firstCpointContour, thirdCpointContour), false);
 
-
     const collinearContour1 = [
       '3504908379293184277775089960751380970484929',
       '3504908379293184267663027581401573803463709',
@@ -190,6 +189,6 @@ describe('contractPoint utils', () => {
       '3504908379293184267199165754924073416653579'
     ];
     assert.equal(contractPoint.contourInsideAnother(collinearContour1, collinearContour2, true), false);
-    assert.equal(contractPoint.contourInsideAnother(collinearContour1, collinearContour2, false), true);
+    assert.equal(contractPoint.contourInsideAnother(collinearContour1, collinearContour2, false), false);
   });
 });
