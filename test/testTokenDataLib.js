@@ -64,4 +64,23 @@ describe('tokenData lib', () => {
         const newLandHumanAddressString = tokenDataLib.generateHumanAddressContractString(result, tokenDataLib.TOKEN_TYPE_BY_NAME.LAND);
         assert.equal(newLandHumanAddressString, "cn=Andromeda|\nrg=Bir Tawil|\nsr=Smugglers Way");
     });
+
+    it('should correctly sort fields', function () {
+        assert.equal(
+          tokenDataLib.generateHumanAddressContractString({
+            "floor":"1",
+            "litera":"2",
+            "city":"Smugglers Way",
+            "country":"Andromeda",
+            "region": "Bir Tawil"
+          }),
+          tokenDataLib.generateHumanAddressContractString({
+            "city":"Smugglers Way",
+            "floor":"1",
+            "region": "Bir Tawil",
+            "litera":"2",
+            "country":"Andromeda"
+          })
+        )
+    });
 });
