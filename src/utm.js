@@ -8,6 +8,7 @@
  */
 
 const common = require('./common');
+const coordinatesLib = require('./coordinates');
 const BN = require("bn.js");
 const web3Utils = require('web3-utils');
 const uniq = require('lodash/uniq');
@@ -52,8 +53,7 @@ module.exports = class Utm {
   }
 
   static getAngle(point1, point2, degree = false) {
-    let angle = Math.atan2(point2.y - point1.y, point2.x - point1.x);
-    return degree ? angle.toDegrees() : angle;
+   return coordinatesLib.getAngle(point1.x, point1.y, point2.x, point2.y, degree);
   }
 
   static uncompress(compressedUtm) {

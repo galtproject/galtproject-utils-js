@@ -10,14 +10,17 @@
 const clone = require('lodash/clone');
 
 module.exports = class Vector {
-  constructor(data) {
+  constructor(data, cData = {x: 0, y: 0}) {
     this.x = data.x;
     this.y = data.y;
+
+    this.cx = cData.x;
+    this.cy = cData.y;
   }
 
   rotate(radians) {
-    let cx = 0,
-        cy = 0,
+    let cx = this.cx,
+        cy = this.cy,
         // radians = (Math.PI / 180) * angle,
         cos = Math.cos(radians),
         sin = Math.sin(radians),
@@ -26,6 +29,14 @@ module.exports = class Vector {
 
     this.x = nx;
     this.y = ny;
+  }
+
+  mul(scale) {
+    const diffX = this.x - this.cx;
+    const diffY = this.y - this.cy;
+
+    this.x = this.cx + diffX * scale;
+    this.y = this.cy + diffY * scale;
   }
 
   applyToUtm(utmObj) {

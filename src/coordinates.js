@@ -7,7 +7,7 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-const common = require('./common');
+const vectorLib = require('./vector');
 const clone = require('lodash/clone');
 
 module.exports = class Coordinates {
@@ -26,5 +26,27 @@ module.exports = class Coordinates {
 
     // Center point
     return [cx, cy];
+  }
+
+  static getAngle(x1, y1, x2, y2, degree = false) {
+    let angle = Math.atan2(y2 - y1, x2 - x1);
+    return degree ? angle.toDegrees() : angle;
+  }
+
+  static polygonShift(polygon, dx, dy, angle = 0, scale = 1) {
+    let firstPoint;
+    return polygon.map((p, index) => {
+      const shiftP = [p[0] + dx, p[1] + dy];
+      if(!index) {
+        firstPoint = shiftP;
+        return shiftP;
+      }
+      const vector = new vectorLib({x: p[0] + dx, y: p[1] + dy}, {x: firstPoint[0], y: firstPoint[1]});
+      vector.rotate(angle);
+      if(scale !== 1) {
+        vector.mul(scale);
+      }
+      return [vector.x, vector.y];
+    });
   }
 };
