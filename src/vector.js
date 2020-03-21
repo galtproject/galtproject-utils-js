@@ -31,12 +31,12 @@ module.exports = class Vector {
     this.y = ny;
   }
 
-  mul(scale) {
+  mul(scaleX, scaleY) {
     const diffX = this.x - this.cx;
     const diffY = this.y - this.cy;
 
-    this.x = this.cx + diffX * scale;
-    this.y = this.cy + diffY * scale;
+    this.x = this.cx + diffX * scaleX;
+    this.y = this.cy + diffY * scaleY;
   }
 
   applyToUtm(utmObj) {

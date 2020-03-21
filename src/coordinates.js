@@ -33,7 +33,7 @@ module.exports = class Coordinates {
     return degree ? angle.toDegrees() : angle;
   }
 
-  static polygonShift(polygon, dx, dy, angle = 0, scale = 1) {
+  static polygonShift(polygon, dx, dy, angle = 0, scaleX = 1, scaleY = 1) {
     let firstPoint;
     return polygon.map((p, index) => {
       const shiftP = [p[0] + dx, p[1] + dy];
@@ -43,8 +43,8 @@ module.exports = class Coordinates {
       }
       const vector = new vectorLib({x: p[0] + dx, y: p[1] + dy}, {x: firstPoint[0], y: firstPoint[1]});
       vector.rotate(angle);
-      if(scale !== 1) {
-        vector.mul(scale);
+      if(scaleX !== 1 || scaleY !== 1) {
+        vector.mul(scaleX, scaleY);
       }
       return [vector.x, vector.y];
     });
