@@ -122,7 +122,7 @@ module.exports = class ContractPoint {
     return ContractPoint.encodeFromLatLngHeight(resultLatLon.lat, resultLatLon.lon, latLonHeight.height);
   }
 
-  static shiftContour(contour, dx, dy, dangle = 0, scaleX = 1, scaleY = 1) {
+  static shiftContourMeters(contour, dx, dy, dangle = 0, scaleX = 1, scaleY = 1) {
     const utmContour = contour.map(cpoint => {
       return ContractPoint.decodeToUtm(cpoint);
     });
@@ -132,6 +132,19 @@ module.exports = class ContractPoint {
       utmPoint.x = point[0];
       utmPoint.y = point[1];
       return ContractPoint.encodeFromUtm(utmPoint);
+    });
+  }
+
+  static shiftContourLatLon(contour, dx, dy, dangle = 0, scaleX = 1, scaleY = 1) {
+    const latLonContour = contour.map(cpoint => {
+      return ContractPoint.decodeToLatLonHeight(cpoint);
+    });
+    const shiftPolygon = Coordinates.polygonShift(latLonContour.map(point => ([point.lat, point.lon])), dx, dy, dangle, scaleX, scaleY);
+    return shiftPolygon.map((point, index) => {
+      const latLon = latLonContour[index];
+      latLon.lat = point[0];
+      latLon.lon = point[1];
+      return ContractPoint.encodeFromLatLngHeight(latLon.lat, latLon.lon, latLon.height);
     });
   }
 
