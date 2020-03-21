@@ -122,11 +122,11 @@ module.exports = class ContractPoint {
     return ContractPoint.encodeFromLatLngHeight(resultLatLon.lat, resultLatLon.lon, latLonHeight.height);
   }
 
-  static shiftContour(contour, dx, dy, dangle = 0) {
+  static shiftContour(contour, dx, dy, dangle = 0, scale = 1) {
     const utmContour = contour.map(cpoint => {
       return ContractPoint.decodeToUtm(cpoint);
     });
-    const shiftPolygon = Coordinates.polygonShift(utmContour.map(point => ([point.x, point.y])), dx, dy, dangle);
+    const shiftPolygon = Coordinates.polygonShift(utmContour.map(point => ([point.x, point.y])), dx, dy, dangle, scale);
     return shiftPolygon.map((point, index) => {
       const utmPoint = utmContour[index];
       utmPoint.x = point[0];
