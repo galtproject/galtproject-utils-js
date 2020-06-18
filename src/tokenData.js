@@ -11,6 +11,7 @@ const map = require('lodash/map');
 const orderBy = require('lodash/orderBy');
 const trim = require('lodash/trim');
 const pick = require('lodash/pick');
+const cyrillicToTranslitJs = require('cyrillic-to-translit-js');
 
 module.exports = class TokenData {
   static get TOKEN_TYPE_BY_ID() {return {"0": "null", "1": "land", "2": "building", "3": "room"}};
@@ -117,5 +118,13 @@ module.exports = class TokenData {
       'room': ['country', 'region', 'city', 'street', 'buildingNumber', 'floor', 'roomNumber', 'share', 'totalShares'],
       'any': ['country', 'region', 'city', 'street', 'plotNumber', 'buildingNumber', 'floor', 'roomNumber', 'share', 'totalShares']
     })[tokenType] || [];
+  }
+
+  static translitTokenFields(tokenData, tokenType = 'any') {
+    const resultTokenData = {};
+    this.getFieldsList(tokenType).forEach(field => {
+      resultTokenData[field] = tokenData[field];
+    });
+    return resultTokenData;
   }
 };
