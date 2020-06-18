@@ -85,6 +85,11 @@ module.exports = class TokenData {
     if(!humanAddressObject) {
       return '';
     }
+    if(humanAddressObject['en']) {
+      humanAddressObject = humanAddressObject['en'];
+    } else if(humanAddressObject['ru']) {
+      humanAddressObject = humanAddressObject['ru'];
+    }
 
     humanAddressObject = pick(humanAddressObject, TokenData.getFieldsList(tokenType));
 
