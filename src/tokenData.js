@@ -23,7 +23,13 @@ module.exports = class TokenData {
       return resultObject;
     }
 
-    const humanAddressObject = ipldData.humanAddress || {};
+    let humanAddressObject = ipldData.humanAddress || {};
+
+    if(humanAddressObject['en']) {
+      humanAddressObject = humanAddressObject['en'];
+    } else if(humanAddressObject['ru']) {
+      humanAddressObject = humanAddressObject['ru'];
+    }
 
     if(!ipldData.protocolVersion || ipldData.protocolVersion < 2) {
       let {countryRegion, cityStreet, floor, litera} = humanAddressObject;
