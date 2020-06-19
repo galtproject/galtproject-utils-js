@@ -128,7 +128,7 @@ module.exports = class TokenData {
   static translitTokenFields(tokenData, tokenType = 'any') {
     const resultTokenData = {};
     this.getFieldsList(tokenType).forEach(field => {
-      resultTokenData[field] = tokenData[field];
+      resultTokenData[field] = cyrillicToTranslitJs.transform(tokenData[field]);
     });
     return resultTokenData;
   }
