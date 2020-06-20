@@ -31,7 +31,11 @@ module.exports = class TokenData {
       humanAddressObject = humanAddressObject['en'];
     }
 
-    if(!ipldData.protocolVersion || ipldData.protocolVersion < 2) {
+    if(!humanAddressObject) {
+      return {};
+    }
+
+    if(!ipldData.protocolVersion || ipldData.protocolVersion < 2 || humanAddressObject.cityStreet) {
       let {countryRegion, cityStreet, floor, litera} = humanAddressObject;
       //
       resultObject['country'] = (countryRegion || '').split(', ')[0] || '';
