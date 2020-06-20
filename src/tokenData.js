@@ -11,6 +11,8 @@ const map = require('lodash/map');
 const orderBy = require('lodash/orderBy');
 const trim = require('lodash/trim');
 const pick = require('lodash/pick');
+const isObject = require('lodash/isObject');
+const isUndefined = require('lodash/isUndefined');
 const cyrillicToTranslitJs = new require('cyrillic-to-translit-js')();
 
 module.exports = class TokenData {
@@ -23,21 +25,14 @@ module.exports = class TokenData {
       return resultObject;
     }
 
-    let humanAddressObject = ipldData.humanAddress || {};
-
-    if(humanAddressObject[lang]) {
-      humanAddressObject = humanAddressObject[lang];
-    } else if(humanAddressObject['en']) {
-      humanAddressObject = humanAddressObject['en'];
-    }
+    let humanAddressObject = ipldData.humanAddress;
 
     if(!humanAddressObject) {
       return {};
     }
 
-    if(!ipldData.protocolVersion || ipldData.protocolVersion < 2 || humanAddressObject.cityStreet) {
+    if(humanAddressObject.cityStreet || humanAddressObject.countryRegion) {
       let {countryRegion, cityStreet, floor, litera} = humanAddressObject;
-      //
       resultObject['country'] = (countryRegion || '').split(', ')[0] || '';
       resultObject['region'] = (countryRegion || '').split(', ')[1] || '';
       resultObject['city'] = '';
@@ -45,10 +40,22 @@ module.exports = class TokenData {
       resultObject['floor'] = floor;
       resultObject['roomNumber'] = litera;
 
-      return pick(resultObject, TokenData.getFieldsList(tokenType));
+      return this.pickHumanAddressFields(resultObject, tokenType, lang);
     } else {
-      return pick(humanAddressObject, TokenData.getFieldsList(tokenType));
+      return this.pickHumanAddressFields(humanAddressObject, tokenType, lang);
     }
+  }
+
+  static pickHumanAddressFields(humanAddressObject, tokenType = 'any', lang = 'en') {
+    const resultObject = {};
+    this.getFieldsList(tokenType).forEach(field => {
+      if(isUndefined(humanAddressObject[field])) {
+        return;
+      }
+      const value = humanAddressObject[field];
+      resultObject[field] = isObject(value) && value.lang ? (value[lang] || value['en']) : value;
+    });
+    return resultObject;
   }
 
   static getHumanAddressFromContractString(contractString, tokenType = 'any'){
@@ -91,17 +98,11 @@ module.exports = class TokenData {
     return pick(resultObject, TokenData.getFieldsList(tokenType));
   }
 
-  static generateHumanAddressContractString(humanAddressObject, tokenType = 'any'){
+  static generateHumanAddressContractString(humanAddressObject, tokenType = 'any', lang = 'en'){
     if(!humanAddressObject) {
       return '';
     }
-    if(humanAddressObject['en']) {
-      humanAddressObject = humanAddressObject['en'];
-    } else if(humanAddressObject['ru']) {
-      humanAddressObject = humanAddressObject['ru'];
-    }
-
-    humanAddressObject = pick(humanAddressObject, TokenData.getFieldsList(tokenType));
+    humanAddressObject = this.pickHumanAddressFields(humanAddressObject, tokenType, lang);
 
     const humanAddressFieldToObjectField = {
       floor: 'fl',
@@ -135,13 +136,18 @@ module.exports = class TokenData {
     })[tokenType] || [];
   }
 
-  static translitTokenFields(tokenData, tokenType = 'any') {
+  static translitTokenFields(tokenData, tokenType = 'any', langToTranslit = 'ru') {
     const resultTokenData = {};
     this.getFieldsList(tokenType).forEach(field => {
-      if(!tokenData[field]) {
+      const fieldValue = tokenData[field];
+      if(isUndefined(fieldValue)) {
         return;
       }
-      resultTokenData[field] = cyrillicToTranslitJs.transform(tokenData[field]);
+      resultTokenData[field] = fieldValue;
+      if(!isObject(fieldValue) || !fieldValue.lang) {
+        return;
+      }
+      resultTokenData[field].en = cyrillicToTranslitJs.transform(fieldValue[langToTranslit]);
     });
     return resultTokenData;
   }
