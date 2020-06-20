@@ -17,7 +17,7 @@ module.exports = class TokenData {
   static get TOKEN_TYPE_BY_ID() {return {"0": "null", "1": "land", "2": "building", "3": "room"}};
   static get TOKEN_TYPE_BY_NAME() {return {ANY: "any", LAND: "land", BUILDING: "building", ROOM: "room"}};
 
-  static getHumanAddressFromIpld(ipldData, tokenType = 'any'){
+  static getHumanAddressFromIpld(ipldData, tokenType = 'any', lang = 'en'){
     const resultObject = {};
     if(!ipldData) {
       return resultObject;
@@ -25,10 +25,10 @@ module.exports = class TokenData {
 
     let humanAddressObject = ipldData.humanAddress || {};
 
-    if(humanAddressObject['en']) {
+    if(humanAddressObject[lang]) {
+      humanAddressObject = humanAddressObject[lang];
+    } else if(humanAddressObject['en']) {
       humanAddressObject = humanAddressObject['en'];
-    } else if(humanAddressObject['ru']) {
-      humanAddressObject = humanAddressObject['ru'];
     }
 
     if(!ipldData.protocolVersion || ipldData.protocolVersion < 2) {
