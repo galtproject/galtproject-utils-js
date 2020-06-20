@@ -12,6 +12,9 @@ const clone = require('lodash/clone');
 
 module.exports = class Coordinates {
   static polygonCenter(polygon) {
+    if(!polygon || !polygon.length) {
+      return null;
+    }
     const points = clone(polygon);
 
     points.sort((a, b) => a[1] - b[1]);

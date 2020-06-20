@@ -11,18 +11,25 @@ const map = require('lodash/map');
 const orderBy = require('lodash/orderBy');
 const trim = require('lodash/trim');
 const pick = require('lodash/pick');
+const cyrillicToTranslitJs = new require('cyrillic-to-translit-js')();
 
 module.exports = class TokenData {
   static get TOKEN_TYPE_BY_ID() {return {"0": "null", "1": "land", "2": "building", "3": "room"}};
   static get TOKEN_TYPE_BY_NAME() {return {ANY: "any", LAND: "land", BUILDING: "building", ROOM: "room"}};
 
-  static getHumanAddressFromIpld(ipldData, tokenType = 'any'){
+  static getHumanAddressFromIpld(ipldData, tokenType = 'any', lang = 'en'){
     const resultObject = {};
     if(!ipldData) {
       return resultObject;
     }
 
-    const humanAddressObject = ipldData.humanAddress || {};
+    let humanAddressObject = ipldData.humanAddress || {};
+
+    if(humanAddressObject[lang]) {
+      humanAddressObject = humanAddressObject[lang];
+    } else if(humanAddressObject['en']) {
+      humanAddressObject = humanAddressObject['en'];
+    }
 
     if(!ipldData.protocolVersion || ipldData.protocolVersion < 2) {
       let {countryRegion, cityStreet, floor, litera} = humanAddressObject;
@@ -84,6 +91,11 @@ module.exports = class TokenData {
     if(!humanAddressObject) {
       return '';
     }
+    if(humanAddressObject['en']) {
+      humanAddressObject = humanAddressObject['en'];
+    } else if(humanAddressObject['ru']) {
+      humanAddressObject = humanAddressObject['ru'];
+    }
 
     humanAddressObject = pick(humanAddressObject, TokenData.getFieldsList(tokenType));
 
@@ -117,5 +129,16 @@ module.exports = class TokenData {
       'room': ['country', 'region', 'city', 'street', 'buildingNumber', 'floor', 'roomNumber', 'share', 'totalShares'],
       'any': ['country', 'region', 'city', 'street', 'plotNumber', 'buildingNumber', 'floor', 'roomNumber', 'share', 'totalShares']
     })[tokenType] || [];
+  }
+
+  static translitTokenFields(tokenData, tokenType = 'any') {
+    const resultTokenData = {};
+    this.getFieldsList(tokenType).forEach(field => {
+      if(!tokenData[field]) {
+        return;
+      }
+      resultTokenData[field] = cyrillicToTranslitJs.transform(tokenData[field]);
+    });
+    return resultTokenData;
   }
 };
