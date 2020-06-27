@@ -105,16 +105,37 @@ describe('tokenData lib', () => {
     assert.deepEqual(
       tokenDataLib.translitTokenFields({
         "floor": "1",
-        "litera": "2",
-        "city": "Красноярск",
-        "country": "Россия",
-        "region": "Красноярский край"
+        "roomNumber": "2",
+        "city": {lang: true, ru: "Красноярск"},
+        "country": {lang: true, ru: "Россия"},
+        "region": {lang: true, ru: "Красноярский край"}
       }),
       {
+        "floor": "1",
+        "roomNumber": "2",
+        "city": {lang: true, ru: "Красноярск", en: "Krasnoyarsk"},
+        "country": {lang: true, ru: "Россия", en: "Rossiya"},
+        "region": {lang: true, ru: "Красноярский край", en: "Krasnoyarskii krai"}
+      })
+  });
+
+  it('should correctly getHumanAddressFromIpld from lang fields', function () {
+    assert.deepEqual(
+      tokenDataLib.getHumanAddressFromIpld({
+        humanAddress: {
+          "floor": "1",
+          "roomNumber": "2",
+          "city": {lang: true, ru: "Красноярск", en: "Krasnoyarsk"},
+          "country": {lang: true, ru: "Россия", en: "Rossiya"},
+          "region": {lang: true, ru: "Красноярский край", en: "Krasnoyarskii krai"}
+        }
+      }),
+      {
+        "floor": "1",
+        "roomNumber": "2",
         "city": "Krasnoyarsk",
         "country": "Rossiya",
-        "floor": "1",
-        "region": "Krasnoyarskii krai",
+        "region": "Krasnoyarskii krai"
       })
   });
 });
