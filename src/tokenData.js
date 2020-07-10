@@ -102,6 +102,9 @@ module.exports = class TokenData {
     if(!humanAddressObject) {
       return '';
     }
+    humanAddressObject = this.getHumanAddressFromIpld({
+      humanAddress: humanAddressObject
+    });
     humanAddressObject = this.pickHumanAddressFields(humanAddressObject, tokenType, lang);
 
     const humanAddressFieldToObjectField = {
